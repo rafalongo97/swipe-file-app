@@ -386,23 +386,29 @@ export default function Dashboard() {
               {/* Pricing Cards */}
               <div>
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100/50">
-                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Valor Front</span>
-                    <span className="text-base font-bold text-blue-700 mt-1 block">
+                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Front-end</span>
+                    <span className="text-sm font-bold text-blue-700 mt-1 block">
                       {formatarPreco(ofertaSelecionada.valor_front)}
                     </span>
                   </div>
-                  <div className="bg-purple-50/50 p-3 rounded-lg border border-purple-100/50">
-                    <span className="text-[10px] font-semibold text-purple-500 uppercase tracking-wider block">Upsell Maior</span>
-                    <span className="text-base font-bold text-purple-700 mt-1 block">
-                      {formatarPreco(ofertaSelecionada.valor_upsell_maior)}
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block">Principal</span>
+                    <span className="text-sm font-bold text-gray-700 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_principal)}
                     </span>
                   </div>
                   <div className="bg-red-50/50 p-3 rounded-lg border border-red-100/50">
-                    <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wider block">Valor Desconto</span>
-                    <span className="text-base font-bold text-red-700 mt-1 block">
+                    <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wider block">Com Desconto</span>
+                    <span className="text-sm font-bold text-red-700 mt-1 block">
                       {formatarPreco(ofertaSelecionada.valor_desconto)}
+                    </span>
+                  </div>
+                  <div className="bg-purple-50/50 p-3 rounded-lg border border-purple-100/50">
+                    <span className="text-[10px] font-semibold text-purple-500 uppercase tracking-wider block">Upsell</span>
+                    <span className="text-sm font-bold text-purple-700 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_upsell || ofertaSelecionada.valor_upsell_maior)}
                     </span>
                   </div>
                 </div>
@@ -440,7 +446,17 @@ export default function Dashboard() {
                   rel="noopener noreferrer"
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
                 >
-                  💳 Ver Checkout
+                  💳 Checkout Principal ↗
+                </a>
+              )}
+              {ofertaSelecionada.link_checkout_upsell && (
+                <a 
+                  href={ofertaSelecionada.link_checkout_upsell}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                >
+                  💳 Checkout Upsell ↗
                 </a>
               )}
             </div>
