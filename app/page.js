@@ -50,11 +50,56 @@ export default function Home() {
     setSalvando(true);
     setMensagem({ type: '', text: '' });
 
-    // 2. LOG CRUCIAL: Verifique no seu F12 (Console) o que aparece aqui
-    console.log("Enviando para Supabase:", formData);
+    // 1. Validação de Obrigatoriedade (Campos obrigatórios específicos)
+    const camposObrigatorios = [
+      { key: 'nome_produto', label: 'Nome do Produto' },
+      { key: 'nicho', label: 'Nicho' },
+      { key: 'subnicho', label: 'Subnicho' },
+      { key: 'data_primeiro_anuncio', label: 'Data do Primeiro Anúncio' },
+      { key: 'tipo_funil', label: 'Tipo de Funil' },
+      { key: 'formato_entrega', label: 'Formato de Entrega' },
+      { key: 'valor_front', label: 'Valor do Front' }
+    ];
 
-    // 3. Envio
-    const { error } = await supabase.from('ofertas_swipe_file').insert([formData]);
+    for (const campo of camposObrigatorios) {
+      const valor = formData[campo.key];
+      if (valor === undefined || valor === null || (typeof valor === 'string' && valor.trim() === '')) {
+        const mensagemErro = `Por favor, preencha o campo obrigatório: "${campo.label}"`;
+        setMensagem({ type: 'error', text: mensagemErro });
+        alert(mensagemErro); // Alerta no navegador em Português do Brasil
+        setSalvando(false);
+        return;
+      }
+    }
+
+    // 2. LOG CRUCIAL: Verifique no seu F12 (Console) o que aparece aqui
+    console.log("Dados do formulário (antes da sanitização):", formData);
+
+    // 3. Correção de Erro Numérico: converter strings vazias ou inválidas para null
+    const sanitizeNumber = (val) => {
+      if (val === "" || val === undefined || val === null) return null;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    };
+
+    const sanitizeInt = (val) => {
+      if (val === "" || val === undefined || val === null) return null;
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? null : parsed;
+    };
+
+    const payload = {
+      ...formData,
+      valor_front: sanitizeNumber(formData.valor_front),
+      valor_upsell_maior: sanitizeNumber(formData.valor_upsell_maior),
+      valor_desconto: sanitizeNumber(formData.valor_desconto),
+      qtd_order_bump: sanitizeInt(formData.qtd_order_bump)
+    };
+
+    console.log("Enviando para Supabase (payload sanitizado):", payload);
+
+    // 4. Envio
+    const { error } = await supabase.from('ofertas_swipe_file').insert([payload]);
 
     if (error) {
       console.error("Erro detalhado do Supabase:", error);
@@ -185,35 +230,38 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Nicho</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Nicho <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
                     name="nicho" 
                     value={formData.nicho} 
                     onChange={handleChange} 
+                    required
                     placeholder="Ex: Emagrecimento"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Subnicho</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Subnicho <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
                     name="subnicho" 
                     value={formData.subnicho} 
                     onChange={handleChange} 
+                    required
                     placeholder="Ex: Keto Diet"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Data do Primeiro Anúncio</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Data do Primeiro Anúncio <span className="text-red-500">*</span></label>
                   <input 
                     type="date" 
                     name="data_primeiro_anuncio" 
                     value={formData.data_primeiro_anuncio} 
                     onChange={handleChange} 
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
@@ -239,11 +287,12 @@ export default function Home() {
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">2. Funil & Destinos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tipo de Funil</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tipo de Funil <span className="text-red-500">*</span></label>
                   <select 
                     name="tipo_funil" 
                     value={formData.tipo_funil} 
                     onChange={handleChange} 
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
                   >
                     <option value="DR">Direct Response (DR)</option>
@@ -251,11 +300,12 @@ export default function Home() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Formato de Entrega</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Formato de Entrega <span className="text-red-500">*</span></label>
                   <select 
                     name="formato_entrega" 
                     value={formData.formato_entrega} 
                     onChange={handleChange} 
+                    required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
                   >
                     <option value="Vídeo">Vídeo</option>
@@ -294,13 +344,14 @@ export default function Home() {
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">3. Precificação & Order Bumps</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Front (R$)</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Front (R$) <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     step="0.01" 
                     name="valor_front" 
                     value={formData.valor_front} 
                     onChange={handleChange} 
+                    required
                     placeholder="0,00"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
@@ -389,4 +440,5 @@ export default function Home() {
     </div>
   );
 }
+
 
