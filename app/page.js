@@ -5,7 +5,10 @@ import { supabase } from '../lib/supabase';
 
 export default function Home() {
   const [carregandoAuth, setCarregandoAuth] = useState(true);
+  const [carregandoDados, setCarregandoDados] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [editId, setEditId] = useState(null);
+  
   const [formData, setFormData] = useState({
     nome_produto: '', 
     status_ativo: true, 
@@ -24,14 +27,59 @@ export default function Home() {
   });
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
 
-  // Verifica se o usuário está logado assim que a página abre
+  // Verifica se o usuário está logado e busca os dados se estiver em modo de edição
   useEffect(() => {
     async function verificarAcesso() {
+      // 1. Verifica sessão
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = '/login'; // Expulsa para o login se não tiver sessão
-      } else {
-        setCarregandoAuth(false);
+        return;
+      }
+      
+      setCarregandoAuth(false);
+
+      // 2. Verifica modo de edição
+      const params = new URLSearchParams(window.location.search);
+      const editParam = params.get('edit');
+      
+      if (editParam) {
+        setEditId(editParam);
+        setCarregandoDados(true);
+        console.log("Modo de edição ativo para o ID:", editParam);
+        
+        const { data, error } = await supabase
+          .from('ofertas_swipe_file')
+          .select('*')
+          .eq('id', editParam)
+          .single();
+          
+        if (error) {
+          console.error("Erro ao buscar dados da oferta para edição:", error);
+          setMensagem({ 
+            type: 'error', 
+            text: 'Não foi possível carregar a oferta para edição.' 
+          });
+        } else if (data) {
+          // Preenche os campos do formulário (convertendo valores numéricos ou nulos para string controlada)
+          setFormData({
+            nome_produto: data.nome_produto || '',
+            status_ativo: data.status_ativo !== undefined ? data.status_ativo : true,
+            nicho: data.nicho || '',
+            subnicho: data.subnicho || '',
+            data_primeiro_anuncio: data.data_primeiro_anuncio || '',
+            tipo_funil: data.tipo_funil || 'DR',
+            link_site: data.link_site || '',
+            link_checkout: data.link_checkout || '',
+            valor_front: data.valor_front !== null && data.valor_front !== undefined ? data.valor_front.toString() : '',
+            valor_upsell_maior: data.valor_upsell_maior !== null && data.valor_upsell_maior !== undefined ? data.valor_upsell_maior.toString() : '',
+            valor_desconto: data.valor_desconto !== null && data.valor_desconto !== undefined ? data.valor_desconto.toString() : '',
+            qtd_order_bump: data.qtd_order_bump !== null && data.qtd_order_bump !== undefined ? data.qtd_order_bump : 0,
+            nomes_order_bumps: data.nomes_order_bumps || '',
+            formato_entrega: data.formato_entrega || 'Vídeo'
+          });
+        }
+        setCarregandoDados(false);
       }
     }
     verificarAcesso();
@@ -98,47 +146,65 @@ export default function Home() {
 
     console.log("Enviando para Supabase (payload sanitizado):", payload);
 
-    // 4. Envio
-    const { error } = await supabase.from('ofertas_swipe_file').insert([payload]);
+    // 4. Envio (Condicional: Update se tiver editId, senão Insert)
+    let dbError = null;
+    if (editId) {
+      const { error } = await supabase
+        .from('ofertas_swipe_file')
+        .update(payload)
+        .eq('id', editId);
+      dbError = error;
+    } else {
+      const { error } = await supabase
+        .from('ofertas_swipe_file')
+        .insert([payload]);
+      dbError = error;
+    }
 
-    if (error) {
-      console.error("Erro detalhado do Supabase:", error);
+    if (dbError) {
+      console.error("Erro detalhado do Supabase:", dbError);
       setMensagem({ 
         type: 'error', 
-        text: `Erro ao salvar a oferta: ${error.message}` 
+        text: `Erro ao salvar a oferta: ${dbError.message}` 
       });
     } else {
       setMensagem({ 
         type: 'success', 
-        text: 'Oferta adicionada ao seu Swipe File com sucesso! 🚀' 
+        text: editId 
+          ? 'Oferta atualizada com sucesso no seu Swipe File! 🚀'
+          : 'Oferta adicionada ao seu Swipe File com sucesso! 🚀' 
       });
-      setFormData({
-        nome_produto: '', 
-        status_ativo: true, 
-        nicho: '', 
-        subnicho: '', 
-        data_primeiro_anuncio: '', 
-        tipo_funil: 'DR', 
-        link_site: '', 
-        link_checkout: '', 
-        valor_front: '', 
-        valor_upsell_maior: '', 
-        valor_desconto: '', 
-        qtd_order_bump: 0, 
-        nomes_order_bumps: '', 
-        formato_entrega: 'Vídeo'
-      });
+      
+      if (!editId) {
+        // Limpa o formulário apenas se for um novo cadastro
+        setFormData({
+          nome_produto: '', 
+          status_ativo: true, 
+          nicho: '', 
+          subnicho: '', 
+          data_primeiro_anuncio: '', 
+          tipo_funil: 'DR', 
+          link_site: '', 
+          link_checkout: '', 
+          valor_front: '', 
+          valor_upsell_maior: '', 
+          valor_desconto: '', 
+          qtd_order_bump: 0, 
+          nomes_order_bumps: '', 
+          formato_entrega: 'Vídeo'
+        });
+      }
     }
     setSalvando(false);
   };
 
-  // Mostra um carregando sutil na validação de login
-  if (carregandoAuth) {
+  // Mostra um carregando sutil na validação de login ou busca de dados de edição
+  if (carregandoAuth || carregandoDados) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500 font-medium">Verificando credenciais...</p>
+          <p className="text-gray-500 font-medium">Carregando informações...</p>
         </div>
       </div>
     );
@@ -180,8 +246,14 @@ export default function Home() {
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-950 tracking-tight">Nova Oferta</h1>
-            <p className="text-sm text-gray-500 mt-1">Registre e organize os elementos de conversão de uma nova oferta.</p>
+            <h1 className="text-3xl font-extrabold text-gray-950 tracking-tight">
+              {editId ? 'Editar Oferta' : 'Nova Oferta'}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {editId 
+                ? 'Atualize os elementos de conversão desta oferta já registrada.' 
+                : 'Registre e organize os elementos de conversão de uma nova oferta.'}
+            </p>
           </div>
           <a 
             href="/dashboard" 
@@ -206,8 +278,15 @@ export default function Home() {
         {/* Card Form */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           
-          <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-4">
-            <h2 className="text-lg font-bold text-gray-900">Formulário de Cadastro</h2>
+          <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-gray-900">
+              {editId ? 'Formulário de Edição' : 'Formulário de Cadastro'}
+            </h2>
+            {editId && (
+              <a href="/" className="text-xs text-blue-600 font-semibold hover:underline bg-blue-50 px-3 py-1 rounded-md">
+                + Criar Nova em vez disso
+              </a>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
@@ -419,10 +498,10 @@ export default function Home() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Salvando Oferta...</span>
+                    <span>{editId ? 'Atualizando...' : 'Salvando...'}</span>
                   </>
                 ) : (
-                  <span>Salvar Oferta</span>
+                  <span>{editId ? 'Salvar Alterações' : 'Salvar Oferta'}</span>
                 )}
               </button>
               
@@ -440,5 +519,3 @@ export default function Home() {
     </div>
   );
 }
-
-
