@@ -33,65 +33,131 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Meu Swipe File 🚀</h1>
-          <div className="flex gap-4">
-            <a href="/" className="bg-blue-600 text-white px-6 py-2 rounded-md shadow hover:bg-blue-700 font-bold transition">
-              + Nova Oferta
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Top Navbar */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                Swipe<span className="text-blue-600">File</span>
+              </span>
+              <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-100">
+                PRO
+              </span>
+            </div>
+            
+            <nav className="flex items-center gap-6">
+              <a href="/dashboard" className="text-sm font-semibold text-blue-600 transition">
+                Dashboard
+              </a>
+              <button 
+                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
+                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition"
+              >
+                Sair
+              </button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        {/* Header section with title and CTA */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-950 tracking-tight">Meu Swipe File 🚀</h1>
+            <p className="text-sm text-gray-500 mt-1">Veja e filtre as ofertas cadastradas e seus funis de conversão.</p>
+          </div>
+          <div>
+            <a 
+              href="/" 
+              className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-800 font-bold transition duration-350 gap-2 cursor-pointer"
+            >
+              <span>+ Nova Oferta</span>
             </a>
-            <button onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} className="text-red-600 font-bold hover:underline px-4 py-2">
-              Sair
-            </button>
           </div>
         </div>
 
+        {/* Dashboard table / content */}
         {carregando ? (
-          <div className="flex justify-center items-center h-32">
-            <p className="text-gray-600 text-lg">Verificando acesso e buscando dados...</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm flex flex-col justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-500 font-medium">Buscando suas ofertas salvas...</p>
           </div>
         ) : ofertas.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow text-center">
-            <p className="text-gray-600">Nenhuma oferta salva ainda. Volte e adicione a sua primeira!</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-16 text-center shadow-sm max-w-xl mx-auto mt-8">
+            <span className="text-4xl mb-4 block">📂</span>
+            <h3 className="text-lg font-bold text-gray-950 mb-2">Nenhuma oferta salva ainda</h3>
+            <p className="text-gray-500 mb-6 text-sm">Comece a construir seu arquivo de referências adicionando a sua primeira oferta ativa.</p>
+            <a 
+              href="/" 
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg shadow hover:bg-blue-700 font-bold transition text-sm"
+            >
+              Criar primeira oferta
+            </a>
           </div>
         ) : (
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="min-w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-gray-200 border-b">
-                <tr>
-                  <th className="p-4 font-bold text-gray-700">Produto</th>
-                  <th className="p-4 font-bold text-gray-700">Nicho</th>
-                  <th className="p-4 font-bold text-gray-700">Funil</th>
-                  <th className="p-4 font-bold text-gray-700">Front (R$)</th>
-                  <th className="p-4 font-bold text-gray-700">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ofertas.map((oferta) => (
-                  <tr key={oferta.id} className="border-b hover:bg-gray-50 transition">
-                    <td className="p-4 font-medium text-gray-900">{oferta.nome_produto}</td>
-                    <td className="p-4 text-gray-600">
-                      {oferta.nicho} {oferta.subnicho && `/ ${oferta.subnicho}`}
-                    </td>
-                    <td className="p-4 text-gray-600">{oferta.tipo_funil}</td>
-                    <td className="p-4 text-gray-600">
-                      {oferta.valor_front ? `R$ ${oferta.valor_front}` : '-'}
-                    </td>
-                    <td className="p-4">
-                      {oferta.status_ativo ? (
-                        <span className="text-green-700 font-bold bg-green-100 px-3 py-1 rounded-full text-xs">Ativo</span>
-                      ) : (
-                        <span className="text-red-700 font-bold bg-red-100 px-3 py-1 rounded-full text-xs">Inativo</span>
-                      )}
-                    </td>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Produto</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Nicho</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Funil</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Front (R$)</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-center">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {ofertas.map((oferta) => (
+                    <tr key={oferta.id} className="hover:bg-gray-50/70 transition">
+                      <td className="p-4 font-bold text-gray-900">{oferta.nome_produto}</td>
+                      <td className="p-4 text-gray-900 font-medium">
+                        {oferta.nicho} 
+                        {oferta.subnicho && (
+                          <span className="text-gray-400 font-normal text-xs ml-1.5 bg-gray-100 px-2 py-0.5 rounded">
+                            {oferta.subnicho}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 text-gray-900 font-medium">
+                        <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-semibold border ${
+                          oferta.tipo_funil === 'DR' 
+                            ? 'bg-purple-50 text-purple-700 border-purple-100' 
+                            : 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                        }`}>
+                          {oferta.tipo_funil === 'DR' ? 'Direct Response (DR)' : 'Um a Um (X1)'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-gray-900 font-bold">
+                        {oferta.valor_front ? `R$ ${parseFloat(oferta.valor_front).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                      </td>
+                      <td className="p-4 text-center">
+                        {oferta.status_ativo ? (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                            <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                            Inativo
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
+
