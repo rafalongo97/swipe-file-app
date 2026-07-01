@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 
 export default function Dashboard() {
@@ -163,12 +164,12 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500 mt-1">Veja e filtre as ofertas cadastradas e seus funis de conversão.</p>
           </div>
           <div>
-            <a 
+            <Link 
               href="/" 
               className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-800 font-bold transition duration-350 gap-2 cursor-pointer"
             >
               <span>+ Nova Oferta</span>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -254,12 +255,12 @@ export default function Dashboard() {
             <span className="text-4xl mb-4 block">📂</span>
             <h3 className="text-lg font-bold text-gray-950 mb-2">Nenhuma oferta salva ainda</h3>
             <p className="text-gray-500 mb-6 text-sm">Comece a construir seu arquivo de referências adicionando a sua primeira oferta activa.</p>
-            <a 
+            <Link 
               href="/" 
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg shadow hover:bg-blue-700 font-bold transition text-sm"
             >
               Criar primeira oferta
-            </a>
+            </Link>
           </div>
         ) : ofertasFiltradas.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-16 text-center shadow-sm max-w-xl mx-auto mt-4">

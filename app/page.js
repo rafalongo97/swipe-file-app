@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '../lib/supabase';
 
 const NICHOS_CONFIG = {
@@ -391,9 +392,9 @@ export default function Home() {
               {editId ? 'Formulário de Edição' : 'Formulário de Cadastro'}
             </h2>
             {editId && (
-              <a href="/" className="text-xs text-blue-600 font-semibold hover:underline bg-blue-50 px-3 py-1 rounded-md">
+              <Link href="/" className="text-xs text-blue-600 font-semibold hover:underline bg-blue-50 px-3 py-1 rounded-md">
                 + Criar Nova em vez disso
-              </a>
+              </Link>
             )}
           </div>
 
