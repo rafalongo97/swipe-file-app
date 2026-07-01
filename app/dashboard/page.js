@@ -46,6 +46,24 @@ export default function Dashboard() {
     return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   };
 
+  const formatarBumpsParaExibicao = (bumpsStr) => {
+    if (!bumpsStr) return '';
+    try {
+      const parsed = JSON.parse(bumpsStr);
+      if (Array.isArray(parsed)) {
+        return parsed.map(bump => {
+          const valorFmt = bump.valor !== null && bump.valor !== undefined && bump.valor !== ""
+            ? `R$ ${parseFloat(bump.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+            : 'S/V';
+          return `${bump.nome} (${valorFmt})`;
+        }).join(', ');
+      }
+    } catch (e) {
+      // Retorna formato antigo se falhar
+    }
+    return bumpsStr;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Top Navbar */}
@@ -183,8 +201,8 @@ export default function Dashboard() {
                       <td className="p-4">
                         <div className="text-xs font-bold text-gray-900">Qtd: {oferta.qtd_order_bump || 0}</div>
                         {oferta.nomes_order_bumps && (
-                          <div className="text-gray-400 text-xs max-w-[150px] truncate mt-0.5" title={oferta.nomes_order_bumps}>
-                            {oferta.nomes_order_bumps}
+                          <div className="text-gray-400 text-xs max-w-[200px] truncate mt-0.5" title={formatarBumpsParaExibicao(oferta.nomes_order_bumps)}>
+                            {formatarBumpsParaExibicao(oferta.nomes_order_bumps)}
                           </div>
                         )}
                       </td>
@@ -254,5 +272,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-

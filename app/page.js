@@ -25,6 +25,7 @@ export default function Home() {
     nomes_order_bumps: '', 
     formato_entrega: 'Vídeo'
   });
+  const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
 
   // Verifica se o usuário está logado e busca os dados se estiver em modo de edição
@@ -78,6 +79,35 @@ export default function Home() {
             nomes_order_bumps: data.nomes_order_bumps || '',
             formato_entrega: data.formato_entrega || 'Vídeo'
           });
+
+          // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
+          let parsedBumps = [];
+          const targetQtd = data.qtd_order_bump || 0;
+          
+          if (data.nomes_order_bumps) {
+            try {
+              const parsed = JSON.parse(data.nomes_order_bumps);
+              if (Array.isArray(parsed)) {
+                parsedBumps = parsed;
+              }
+            } catch (e) {
+              // Formato antigo/legado (texto simples separado por vírgula)
+              const nomes = data.nomes_order_bumps.split(',').map(n => n.trim());
+              parsedBumps = nomes.map(nome => ({ nome, valor: '' }));
+            }
+          }
+
+          // Ajusta tamanho para bater com a quantidade de order bumps registrada
+          if (parsedBumps.length < targetQtd) {
+            const diff = targetQtd - parsedBumps.length;
+            for (let i = 0; i < diff; i++) {
+              parsedBumps.push({ nome: '', valor: '' });
+            }
+          } else if (parsedBumps.length > targetQtd && targetQtd > 0) {
+            parsedBumps = parsedBumps.slice(0, targetQtd);
+          }
+
+          setOrderBumps(parsedBumps);
         }
         setCarregandoDados(false);
       }
@@ -90,6 +120,38 @@ export default function Home() {
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleQtdBumpsChange = (e) => {
+    const value = parseInt(e.target.value, 10) || 0;
+    const cleanValue = Math.max(0, value);
+    
+    setFormData(prev => ({
+      ...prev,
+      qtd_order_bump: cleanValue
+    }));
+
+    setOrderBumps(prev => {
+      const currentLength = prev.length;
+      if (cleanValue > currentLength) {
+        const diff = cleanValue - currentLength;
+        const newBumps = Array.from({ length: diff }, () => ({ nome: '', valor: '' }));
+        return [...prev, ...newBumps];
+      } else {
+        return prev.slice(0, cleanValue);
+      }
+    });
+  };
+
+  const handleBumpFieldChange = (index, field, value) => {
+    setOrderBumps(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value
+      };
+      return updated;
     });
   };
 
@@ -120,6 +182,19 @@ export default function Home() {
       }
     }
 
+    // Validação extra para os Order Bumps dinâmicos que foram ativados
+    if (formData.qtd_order_bump > 0) {
+      for (let i = 0; i < orderBumps.length; i++) {
+        if (!orderBumps[i].nome || orderBumps[i].nome.trim() === '') {
+          const mensagemErro = `Por favor, preencha o Nome do Order Bump #${i + 1}`;
+          setMensagem({ type: 'error', text: mensagemErro });
+          alert(mensagemErro);
+          setSalvando(false);
+          return;
+        }
+      }
+    }
+
     // 2. LOG CRUCIAL: Verifique no seu F12 (Console) o que aparece aqui
     console.log("Dados do formulário (antes da sanitização):", formData);
 
@@ -136,12 +211,19 @@ export default function Home() {
       return isNaN(parsed) ? null : parsed;
     };
 
+    // Sanitiza valores dos Order Bumps dinâmicos
+    const sanitizedBumps = orderBumps.map(bump => ({
+      nome: bump.nome ? bump.nome.trim() : '',
+      valor: sanitizeNumber(bump.valor)
+    }));
+
     const payload = {
       ...formData,
       valor_front: sanitizeNumber(formData.valor_front),
       valor_upsell_maior: sanitizeNumber(formData.valor_upsell_maior),
       valor_desconto: sanitizeNumber(formData.valor_desconto),
-      qtd_order_bump: sanitizeInt(formData.qtd_order_bump)
+      qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
+      nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : ''
     };
 
     console.log("Enviando para Supabase (payload sanitizado):", payload);
@@ -193,6 +275,7 @@ export default function Home() {
           nomes_order_bumps: '', 
           formato_entrega: 'Vídeo'
         });
+        setOrderBumps([]);
       }
     }
     setSalvando(false);
@@ -246,7 +329,7 @@ export default function Home() {
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-950 tracking-tight">
+            <h1 className="text-3xl font-extrabold text-gray-955 tracking-tight">
               {editId ? 'Editar Oferta' : 'Nova Oferta'}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
@@ -466,24 +549,57 @@ export default function Home() {
                     type="number" 
                     name="qtd_order_bump" 
                     value={formData.qtd_order_bump} 
-                    onChange={handleChange} 
+                    onChange={handleQtdBumpsChange} 
                     min="0"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                  />
-                </div>
-                <div className="col-span-1 md:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Nomes dos Order Bumps</label>
-                  <input 
-                    type="text" 
-                    name="nomes_order_bumps" 
-                    value={formData.nomes_order_bumps} 
-                    onChange={handleChange} 
-                    placeholder="Ex: Planilha VIP, Acesso Vitalício"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
               </div>
             </div>
+
+            {/* Dynamic Order Bumps sub-form */}
+            {formData.qtd_order_bump > 0 && (
+              <div className="pt-6 border-t border-gray-100 bg-gray-50/40 p-5 rounded-xl border border-gray-200/60 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Configuração dos Order Bumps</h4>
+                  <span className="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-0.5 rounded-full">
+                    {formData.qtd_order_bump} {formData.qtd_order_bump === 1 ? 'Item' : 'Itens'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {orderBumps.map((bump, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:border-blue-200 transition">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                          Nome do Bump #{index + 1} <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                          type="text"
+                          value={bump.nome}
+                          onChange={(e) => handleBumpFieldChange(index, 'nome', e.target.value)}
+                          placeholder="Ex: Planilha VIP"
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm font-medium"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                          Valor do Bump #{index + 1} (R$)
+                        </label>
+                        <input 
+                          type="number"
+                          step="0.01"
+                          value={bump.valor}
+                          onChange={(e) => handleBumpFieldChange(index, 'valor', e.target.value)}
+                          placeholder="0,00"
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm font-medium"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
