@@ -7,6 +7,11 @@ export default function Dashboard() {
   const [ofertas, setOfertas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
+  // Estados dos filtros
+  const [filtroBusca, setFiltroBusca] = useState('');
+  const [filtroNicho, setFiltroNicho] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
+
   useEffect(() => {
     async function carregarDados() {
       // Verifica o cadeado primeiro
@@ -31,6 +36,32 @@ export default function Dashboard() {
     
     carregarDados();
   }, []);
+
+  // Extrai dinamicamente todos os nichos únicos existentes
+  const nichosDisponiveis = Array.from(
+    new Set(ofertas.map(o => o.nicho).filter(Boolean))
+  ).sort();
+
+  // Filtra as ofertas na memória em tempo real
+  const ofertasFiltradas = ofertas.filter(oferta => {
+    // 1. Busca por nome do produto
+    const matchBusca = oferta.nome_produto
+      ?.toLowerCase()
+      .includes(filtroBusca.toLowerCase());
+
+    // 2. Filtro por Nicho
+    const matchNicho = filtroNicho === '' || oferta.nicho === filtroNicho;
+
+    // 3. Filtro por Status (Ativo / Inativo)
+    let matchStatus = true;
+    if (filtroStatus === 'ativos') {
+      matchStatus = oferta.status_ativo === true;
+    } else if (filtroStatus === 'inativos') {
+      matchStatus = oferta.status_ativo === false;
+    }
+
+    return matchBusca && matchNicho && matchStatus;
+  });
 
   const formatarData = (dataStr) => {
     if (!dataStr) return '-';
@@ -113,6 +144,77 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Filtros Avançados */}
+        {!carregando && ofertas.length > 0 && (
+          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Campo de Busca */}
+            <div className="w-full md:flex-1 relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                🔍
+              </span>
+              <input
+                type="text"
+                value={filtroBusca}
+                onChange={(e) => setFiltroBusca(e.target.value)}
+                placeholder="Buscar por produto..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm"
+              />
+              {filtroBusca && (
+                <button 
+                  onClick={() => setFiltroBusca('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+
+            {/* Dropdowns */}
+            <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+              {/* Filtro Nicho */}
+              <div className="w-full sm:w-48">
+                <select
+                  value={filtroNicho}
+                  onChange={(e) => setFiltroNicho(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="">Todos os Nichos</option>
+                  {nichosDisponiveis.map(nicho => (
+                    <option key={nicho} value={nicho}>{nicho}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro Status */}
+              <div className="w-full sm:w-40">
+                <select
+                  value={filtroStatus}
+                  onChange={(e) => setFiltroStatus(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="ativos">Ativo</option>
+                  <option value="inativos">Inativo (Off)</option>
+                </select>
+              </div>
+
+              {/* Botão de Limpar Filtros */}
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos') && (
+                <button
+                  onClick={() => {
+                    setFiltroBusca('');
+                    setFiltroNicho('');
+                    setFiltroStatus('todos');
+                  }}
+                  className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
+                >
+                  Limpar Filtros
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Dashboard table / content */}
         {carregando ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm flex flex-col justify-center items-center h-64">
@@ -131,6 +233,22 @@ export default function Dashboard() {
               Criar primeira oferta
             </a>
           </div>
+        ) : ofertasFiltradas.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-16 text-center shadow-sm max-w-xl mx-auto mt-4">
+            <span className="text-4xl mb-4 block">🔍</span>
+            <h3 className="text-lg font-bold text-gray-950 mb-2">Nenhuma oferta encontrada</h3>
+            <p className="text-gray-500 mb-6 text-sm">Nenhuma oferta encontrada com esses critérios. Tente mudar o texto da busca ou selecionar outros filtros.</p>
+            <button 
+              onClick={() => {
+                setFiltroBusca('');
+                setFiltroNicho('');
+                setFiltroStatus('todos');
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
+            >
+              Limpar Filtros
+            </button>
+          </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
@@ -148,7 +266,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {ofertas.map((oferta) => (
+                  {ofertasFiltradas.map((oferta) => (
                     <tr key={oferta.id} className="hover:bg-gray-50/70 transition">
                       {/* Produto & Data */}
                       <td className="p-4">
