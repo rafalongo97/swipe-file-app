@@ -50,13 +50,17 @@ export default function Home() {
     setSalvando(true);
     setMensagem({ type: '', text: '' });
 
+    // 2. LOG CRUCIAL: Verifique no seu F12 (Console) o que aparece aqui
+    console.log("Enviando para Supabase:", formData);
+
+    // 3. Envio
     const { error } = await supabase.from('ofertas_swipe_file').insert([formData]);
 
     if (error) {
-      console.error(error);
+      console.error("Erro detalhado do Supabase:", error);
       setMensagem({ 
         type: 'error', 
-        text: 'Erro ao salvar a oferta. Por favor, tente novamente.' 
+        text: `Erro ao salvar a oferta: ${error.message}` 
       });
     } else {
       setMensagem({ 
