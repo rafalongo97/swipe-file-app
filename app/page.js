@@ -3,6 +3,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+const NICHOS_CONFIG = {
+  'Ganhar Dinheiro': ['Marketing Digital', 'Renda Extra', 'Trade', 'Investimentos', 'Criptomoedas', 'Afiliados'],
+  'Saúde & Bem-estar': ['Emagrecimento', 'Fitness / Musculação', 'Dietas / Nutrição', 'Saúde Mental', 'Suplementos'],
+  'Relacionamentos': ['Sedução / Conquista', 'Casamento / Família', 'Amizades / Networking'],
+  'Desenvolvimento Pessoal': ['Produtividade', 'Autoajuda', 'Oratória / Inteligência Emocional', 'Espiritualidade'],
+  'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI']
+};
+
 export default function Home() {
   const [carregandoAuth, setCarregandoAuth] = useState(true);
   const [carregandoDados, setCarregandoDados] = useState(false);
@@ -117,10 +125,19 @@ export default function Home() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    
+    if (name === 'nicho') {
+      setFormData({
+        ...formData,
+        nicho: value,
+        subnicho: '' // Zera o subnicho se o nicho for alterado
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
   const handleQtdBumpsChange = (e) => {
@@ -393,27 +410,38 @@ export default function Home() {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Nicho <span className="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
-                    name="nicho" 
-                    value={formData.nicho} 
-                    onChange={handleChange} 
+                  <select
+                    name="nicho"
+                    value={formData.nicho}
+                    onChange={handleChange}
                     required
-                    placeholder="Ex: Emagrecimento"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                  />
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
+                  >
+                    <option value="">Selecione um nicho</option>
+                    {Object.keys(NICHOS_CONFIG).map((nichoKey) => (
+                      <option key={nichoKey} value={nichoKey}>
+                        {nichoKey}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Subnicho <span className="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
-                    name="subnicho" 
-                    value={formData.subnicho} 
-                    onChange={handleChange} 
+                  <select
+                    name="subnicho"
+                    value={formData.subnicho}
+                    onChange={handleChange}
                     required
-                    placeholder="Ex: Keto Diet"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                  />
+                    disabled={!formData.nicho}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Selecione um subnicho</option>
+                    {formData.nicho && NICHOS_CONFIG[formData.nicho] && NICHOS_CONFIG[formData.nicho].map((subnichoName) => (
+                      <option key={subnichoName} value={subnichoName}>
+                        {subnichoName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 export default function Dashboard() {
   const [ofertas, setOfertas] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [ofertaSelecionada, setOfertaSelecionada] = useState(null);
 
   // Estados dos filtros
   const [filtroBusca, setFiltroBusca] = useState('');
@@ -63,13 +64,22 @@ export default function Dashboard() {
     return matchBusca && matchNicho && matchStatus;
   });
 
-  const formatarData = (dataStr) => {
-    if (!dataStr) return '-';
-    const parts = dataStr.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
-    }
-    return dataStr;
+  const obterTempoAtivo = (dataPrimeiroAnuncio) => {
+    if (!dataPrimeiroAnuncio) return 'Sem registro';
+    const dataAnuncio = new Date(dataPrimeiroAnuncio);
+    const dataAtual = new Date();
+    
+    // Zera horas para focar nos dias calendários
+    dataAnuncio.setHours(0, 0, 0, 0);
+    dataAtual.setHours(0, 0, 0, 0);
+    
+    const diferencaMs = dataAtual.getTime() - dataAnuncio.getTime();
+    const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+    
+    if (diferencaDias < 0) return 'Data futura';
+    if (diferencaDias === 0) return 'Ativo hoje';
+    if (diferencaDias === 1) return 'Ativo há 1 dia';
+    return `Ativo há ${diferencaDias} dias`;
   };
 
   const formatarPreco = (valor) => {
@@ -77,22 +87,40 @@ export default function Dashboard() {
     return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   };
 
-  const formatarBumpsParaExibicao = (bumpsStr) => {
-    if (!bumpsStr) return '';
+  const renderOrderBumpsModal = () => {
+    if (!ofertaSelecionada.nomes_order_bumps) {
+      return <p className="text-xs text-gray-500 italic mt-1">Nenhum order bump registrado para esta oferta.</p>;
+    }
     try {
-      const parsed = JSON.parse(bumpsStr);
-      if (Array.isArray(parsed)) {
-        return parsed.map(bump => {
-          const valorFmt = bump.valor !== null && bump.valor !== undefined && bump.valor !== ""
-            ? `R$ ${parseFloat(bump.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-            : 'S/V';
-          return `${bump.nome} (${valorFmt})`;
-        }).join(', ');
+      const parsed = JSON.parse(ofertaSelecionada.nomes_order_bumps);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return (
+          <div className="flex flex-col gap-2 mt-2">
+            {parsed.map((bump, idx) => (
+              <div key={idx} className="bg-white border border-gray-200 text-gray-700 text-xs px-3.5 py-2 rounded-lg font-medium shadow-2xs flex justify-between items-center">
+                <span>{bump.nome}</span>
+                {bump.valor !== null && bump.valor !== undefined && bump.valor !== "" && (
+                  <span className="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                    {formatarPreco(bump.valor)}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        );
       }
     } catch (e) {
-      // Retorna formato antigo se falhar
+      // Fallback
     }
-    return bumpsStr;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {ofertaSelecionada.nomes_order_bumps.split(',').map((bump, idx) => (
+          <span key={idx} className="bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-md font-medium shadow-2xs">
+            {bump.trim()}
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -255,129 +283,27 @@ export default function Dashboard() {
               <table className="min-w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Produto & Data</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Nicho</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Funil / Entrega</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Precificação (R$)</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Order Bumps</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Links</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-center">Status</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-center">Ações</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Nome da Oferta</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Tempo Ativo</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {ofertasFiltradas.map((oferta) => (
-                    <tr key={oferta.id} className="hover:bg-gray-50/70 transition">
-                      {/* Produto & Data */}
+                    <tr 
+                      key={oferta.id} 
+                      onClick={() => setOfertaSelecionada(oferta)}
+                      className="hover:bg-blue-50/40 cursor-pointer transition-all duration-200"
+                    >
+                      {/* Produto */}
                       <td className="p-4">
-                        <div className="font-bold text-gray-900">{oferta.nome_produto}</div>
-                        <div className="text-gray-400 text-xs mt-0.5">Anúncio: {formatarData(oferta.data_primeiro_anuncio)}</div>
-                      </td>
-
-                      {/* Nicho / Subnicho */}
-                      <td className="p-4">
-                        <div className="text-gray-900 font-bold">{oferta.nicho}</div>
-                        {oferta.subnicho && (
-                          <div className="text-gray-400 text-xs mt-0.5">{oferta.subnicho}</div>
-                        )}
-                      </td>
-
-                      {/* Funil & Entrega */}
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1.5 items-start">
-                          <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold border ${
-                            oferta.tipo_funil === 'DR' 
-                              ? 'bg-purple-50 text-purple-700 border-purple-100' 
-                              : 'bg-indigo-50 text-indigo-700 border-indigo-100'
-                          }`}>
-                            {oferta.tipo_funil === 'DR' ? 'Direct Response (DR)' : 'Um a Um (X1)'}
-                          </span>
-                          <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold border bg-gray-50 text-gray-600 border-gray-100">
-                            Entrega: {oferta.formato_entrega}
-                          </span>
+                        <div className="font-bold text-gray-900 flex items-center gap-2">
+                          <span className="text-base">📁</span> {oferta.nome_produto}
                         </div>
                       </td>
 
-                      {/* Precificação */}
-                      <td className="p-4">
-                        <div className="text-xs text-gray-500">
-                          <span className="font-semibold text-gray-900">Front:</span> {formatarPreco(oferta.valor_front)}
-                        </div>
-                        {oferta.valor_desconto && (
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            <span className="font-semibold text-gray-900">Desc:</span> {formatarPreco(oferta.valor_desconto)}
-                          </div>
-                        )}
-                        {oferta.valor_upsell_maior && (
-                          <div className="text-xs text-gray-500 mt-0.5">
-                            <span className="font-semibold text-gray-900">Upsell:</span> {formatarPreco(oferta.valor_upsell_maior)}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Order Bumps */}
-                      <td className="p-4">
-                        <div className="text-xs font-bold text-gray-900">Qtd: {oferta.qtd_order_bump || 0}</div>
-                        {oferta.nomes_order_bumps && (
-                          <div className="text-gray-400 text-xs max-w-[200px] truncate mt-0.5" title={formatarBumpsParaExibicao(oferta.nomes_order_bumps)}>
-                            {formatarBumpsParaExibicao(oferta.nomes_order_bumps)}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Links */}
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1 text-xs">
-                          {oferta.link_site ? (
-                            <a 
-                              href={oferta.link_site} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="text-blue-600 hover:text-blue-800 underline font-semibold transition"
-                            >
-                              Site da Oferta ↗
-                            </a>
-                          ) : (
-                            <span className="text-gray-400">Sem site</span>
-                          )}
-                          {oferta.link_checkout ? (
-                            <a 
-                              href={oferta.link_checkout} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="text-blue-600 hover:text-blue-800 underline font-semibold transition"
-                            >
-                              Checkout ↗
-                            </a>
-                          ) : (
-                            <span className="text-gray-400">Sem checkout</span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="p-4 text-center">
-                        {oferta.status_ativo ? (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-                            Ativo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
-                            <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
-                            Inativo
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Ações */}
-                      <td className="p-4 text-center">
-                        <a 
-                          href={`/?edit=${oferta.id}`} 
-                          className="inline-flex items-center justify-center bg-gray-100 hover:bg-blue-50 text-gray-700 hover:text-blue-700 font-bold px-3.5 py-1.5 rounded-lg border border-gray-200 hover:border-blue-200 transition text-xs cursor-pointer shadow-sm"
-                        >
-                          Editar
-                        </a>
+                      {/* Tempo Ativo */}
+                      <td className="p-4 text-gray-600 font-semibold">
+                        {obterTempoAtivo(oferta.data_primeiro_anuncio)}
                       </td>
                     </tr>
                   ))}
@@ -387,6 +313,141 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* MODAL DE DETALHES DA OFERTA */}
+      {ofertaSelecionada && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[90vh]">
+            
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 leading-snug">
+                  {ofertaSelecionada.nome_produto}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">Detalhes completos do Swipe File</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {ofertaSelecionada.status_ativo ? (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                    Ativo
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                    Inativo
+                  </span>
+                )}
+                <button 
+                  onClick={() => setOfertaSelecionada(null)}
+                  className="text-gray-400 hover:text-gray-600 bg-gray-200/50 hover:bg-gray-200 p-2 rounded-full transition"
+                  aria-label="Fechar"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Content (Scrollable) */}
+            <div className="overflow-y-auto p-6 space-y-6">
+              {/* Category & Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Nicho / Subnicho</span>
+                  <span className="text-sm font-semibold text-gray-800">
+                    {ofertaSelecionada.nicho || 'Não informado'} 
+                    {ofertaSelecionada.subnicho && ` › ${ofertaSelecionada.subnicho}`}
+                  </span>
+                </div>
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tempo Ativo</span>
+                  <span className="text-sm font-semibold text-gray-800">
+                    {obterTempoAtivo(ofertaSelecionada.data_primeiro_anuncio)} 
+                    {ofertaSelecionada.data_primeiro_anuncio && ` (desde ${ofertaSelecionada.data_primeiro_anuncio.split('-').reverse().join('/')})`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Funnel & Delivery format */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tipo de Funil</span>
+                  <span className="text-sm font-bold text-blue-600">
+                    {ofertaSelecionada.tipo_funil === 'DR' ? 'Direct Response (DR)' : ofertaSelecionada.tipo_funil === 'X1' ? 'Um a Um (X1)' : ofertaSelecionada.tipo_funil}
+                  </span>
+                </div>
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Formato de Entrega</span>
+                  <span className="text-sm font-semibold text-gray-800">{ofertaSelecionada.formato_entrega}</span>
+                </div>
+              </div>
+
+              {/* Pricing Cards */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100/50">
+                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Valor Front</span>
+                    <span className="text-base font-bold text-blue-700 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_front)}
+                    </span>
+                  </div>
+                  <div className="bg-purple-50/50 p-3 rounded-lg border border-purple-100/50">
+                    <span className="text-[10px] font-semibold text-purple-500 uppercase tracking-wider block">Upsell Maior</span>
+                    <span className="text-base font-bold text-purple-700 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_upsell_maior)}
+                    </span>
+                  </div>
+                  <div className="bg-red-50/50 p-3 rounded-lg border border-red-100/50">
+                    <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wider block">Valor Desconto</span>
+                    <span className="text-base font-bold text-red-700 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_desconto)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Bumps Section */}
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Order Bumps</span>
+                {renderOrderBumpsModal()}
+              </div>
+            </div>
+
+            {/* Footer with links */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-wrap sm:flex-nowrap gap-3">
+              <a 
+                href={`/?edit=${ofertaSelecionada.id}`}
+                className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 text-center font-bold py-2.5 px-6 rounded-lg text-sm transition"
+              >
+                ✏️ Editar Oferta
+              </a>
+              {ofertaSelecionada.link_site && (
+                <a 
+                  href={ofertaSelecionada.link_site}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                >
+                  🔗 Ver Site / LP
+                </a>
+              )}
+              {ofertaSelecionada.link_checkout && (
+                <a 
+                  href={ofertaSelecionada.link_checkout}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                >
+                  💳 Ver Checkout
+                </a>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
