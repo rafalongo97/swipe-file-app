@@ -76,7 +76,7 @@ export default function Login() {
             disabled={carregando}
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-300 transition shadow-lg transform hover:-translate-y-0.5"
           >
-            {carregando ? 'Entrando...' : 'Entrar no Sistema'}
+            {carregando ? 'Entrando...' : 'Entrar no Swipe'}
           </button>
         </form>
         
