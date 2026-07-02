@@ -28,7 +28,7 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Regras customizadas do Modo Escuro */
+/* Regras customizadas do Modo Escuro (Preto e Cinza Slate Premium) */
 .dark h1, 
 .dark h2, 
 .dark h3, 
@@ -39,12 +39,12 @@ body {
 }
 
 .dark label {
-  color: #d1d5db !important;
+  color: #a1a1aa !important; /* zinc-400 */
 }
 
 .dark header {
-  background-color: #1f2937 !important;
-  border-color: #374151 !important;
+  background-color: #15161b !important;
+  border-color: #2a2b33 !important;
 }
 
 .dark header span.text-gray-900 {
@@ -52,58 +52,116 @@ body {
 }
 
 .dark nav a {
-  color: #d1d5db !important;
+  color: #a1a1aa !important;
 }
 
 .dark nav a:hover {
-  color: #60a5fa !important;
+  color: #3b82f6 !important;
 }
 
-/* Forçar fundos de tela geral no modo dark */
+/* Forçar fundos de tela geral no modo dark (Preto Slate) */
 .dark,
 .dark body,
 .dark div.bg-gray-50,
-.dark main.bg-gray-50 {
-  background-color: #111827 !important;
+.dark main.bg-gray-50,
+.dark div.min-h-screen {
+  background-color: #0d0e12 !important;
 }
 
-/* Cards e recipientes internos */
+/* Cards e recipientes internos (Cinza escuro neutral) */
 .dark .bg-white {
-  background-color: #1f2937 !important;
-  border-color: #374151 !important;
+  background-color: #15161b !important;
+  border-color: #2a2b33 !important;
 }
 
 .dark .border-gray-200 {
-  border-color: #374151 !important;
+  border-color: #2a2b33 !important;
 }
 
 .dark .border-gray-100 {
-  border-color: #374151 !important;
+  border-color: #2a2b33 !important;
 }
 
-.dark .bg-gray-50\/50 {
-  background-color: rgba(31, 41, 55, 0.4) !important;
-}
-
+/* Cabeçalhos internos de modal, rodapés e divisões */
+.dark .bg-gray-50\/50,
+.dark .bg-gray-50\/40,
 .dark .bg-gray-50 {
-  background-color: #1f2937 !important;
-  border-color: #374151 !important;
+  background-color: #1d1e24 !important;
+  border-color: #2a2b33 !important;
 }
 
+/* Textos gerais do modo dark */
+.dark .text-gray-950,
 .dark .text-gray-900 {
-  color: #f9fafb !important;
+  color: #ffffff !important;
 }
 
-.dark .text-gray-500 {
-  color: #9ca3af !important;
-}
-
-.dark .text-gray-600 {
-  color: #d1d5db !important;
+.dark .text-gray-800 {
+  color: #f4f4f5 !important; /* zinc-100 (Muito legível) */
 }
 
 .dark .text-gray-700 {
-  color: #e5e7eb !important;
+  color: #e4e4e7 !important; /* zinc-200 */
+}
+
+.dark .text-gray-600 {
+  color: #d4d4d8 !important; /* zinc-300 */
+}
+
+.dark .text-gray-500 {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+.dark .text-gray-400 {
+  color: #a1a1aa !important; /* zinc-400 (Forçar visibilidade dos labels secundários) */
+}
+
+/* Elementos de Informação no Modal (Nicho, Tempo Ativo, etc.) */
+.dark div.bg-gray-50.p-3\.5 {
+  background-color: #1d1e24 !important;
+  border-color: #2a2b33 !important;
+}
+
+.dark div.bg-gray-50.p-3\.5 span.text-xs.text-gray-400,
+.dark div.bg-gray-50.p-3\.5 span.text-gray-400 {
+  color: #a1a1aa !important; /* Labels secundários legíveis */
+}
+
+.dark div.bg-gray-50.p-3\.5 span.text-sm.text-gray-800,
+.dark div.bg-gray-50.p-3\.5 span.text-gray-800 {
+  color: #ffffff !important; /* Informação legível */
+}
+
+/* Tipo de funil destacado em azul no dark */
+.dark div.bg-gray-50.p-3\.5 span.text-blue-600 {
+  color: #60a5fa !important;
+}
+
+/* Preço Front Card no Modal */
+.dark .bg-blue-50\/50 {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .bg-blue-50\/50 span.text-blue-500 {
+  color: #60a5fa !important; /* Label Preço Front */
+}
+
+.dark .bg-blue-50\/50 span.text-blue-700 {
+  color: #ffffff !important; /* Valor do preço em branco */
+}
+
+/* Order Bumps section inside Modal */
+.dark .bg-white.border.border-gray-200.text-gray-700.text-xs {
+  background-color: #1d1e24 !important;
+  border-color: #2a2b33 !important;
+  color: #e4e4e7 !important;
+}
+
+.dark .bg-white.border.border-gray-200.text-gray-700.text-xs span.text-blue-600 {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+  color: #60a5fa !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
 /* Estilo de inputs e seletores */
@@ -112,47 +170,55 @@ body {
 .dark input[type="date"],
 .dark input[type="url"],
 .dark select {
-  background-color: #111827 !important;
+  background-color: #0d0e12 !important;
   color: #ffffff !important;
-  border-color: #374151 !important;
+  border-color: #2a2b33 !important;
+}
+
+.dark input[type="text"]:focus,
+.dark input[type="number"]:focus,
+.dark input[type="date"]:focus,
+.dark input[type="url"]:focus,
+.dark select:focus {
+  border-color: #3b82f6 !important;
 }
 
 .dark input::placeholder {
-  color: #9ca3af !important;
+  color: #52525b !important; /* zinc-600 */
 }
 
 .dark input:disabled,
 .dark select:disabled {
-  background-color: #1f2937 !important;
-  color: #6b7280 !important;
+  background-color: #15161b !important;
+  color: #71717a !important;
+  border-color: #2a2b33 !important;
 }
 
 /* Tabelas e elementos secundários do Dashboard */
+.dark thead.bg-gray-50 {
+  background-color: #1d1e24 !important;
+}
+
+.dark thead.bg-gray-50 th {
+  color: #a1a1aa !important;
+}
+
 .dark tr:hover {
-  background-color: rgba(30, 58, 138, 0.15) !important;
+  background-color: rgba(59, 130, 246, 0.08) !important;
 }
 
 .dark .divide-gray-100 {
-  border-color: #374151 !important;
+  border-color: #2a2b33 !important;
 }
 
 .dark .border-blue-100 {
-  border-color: rgba(59, 130, 246, 0.3) !important;
-}
-
-.dark .bg-gray-50\/40 {
-  background-color: rgba(17, 24, 39, 0.4) !important;
-  border-color: rgba(55, 65, 81, 0.6) !important;
-}
-
-.dark .border-gray-200\/60 {
-  border-color: rgba(55, 65, 81, 0.6) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 .dark .bg-blue-50 {
-  background-color: rgba(30, 58, 138, 0.3) !important;
+  background-color: rgba(37, 99, 235, 0.2) !important;
   color: #60a5fa !important;
-  border-color: rgba(59, 130, 246, 0.4) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
 .dark .text-blue-700 {
@@ -173,7 +239,7 @@ body {
 
 /* Elementos de Exclusão e Modais específicos */
 .dark .border-red-100 {
-  border-color: rgba(220, 38, 38, 0.3) !important;
+  border-color: rgba(220, 38, 38, 0.2) !important;
 }
 
 .dark .bg-red-50 {
