@@ -417,8 +417,12 @@ export default function Dashboard() {
                       </td>
 
                       {/* Tempo Ativo */}
-                      <td className="p-4 text-gray-600 font-semibold">
-                        {obterTempoAtivo(oferta.data_primeiro_anuncio)}
+                      <td className="p-4 text-gray-600 dark:text-gray-400 font-semibold">
+                        {oferta.status_ativo === false ? (
+                          <span className="text-red-500 dark:text-red-400 font-bold">Oferta inativa</span>
+                        ) : (
+                          obterTempoAtivo(oferta.data_primeiro_anuncio)
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -484,8 +488,14 @@ export default function Dashboard() {
                 <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tempo Ativo</span>
                   <span className="text-sm font-semibold text-gray-800">
-                    {obterTempoAtivo(ofertaSelecionada.data_primeiro_anuncio)} 
-                    {ofertaSelecionada.data_primeiro_anuncio && ` (desde ${ofertaSelecionada.data_primeiro_anuncio.split('-').reverse().join('/')})`}
+                    {ofertaSelecionada.status_ativo === false ? (
+                      <span className="text-red-500 dark:text-red-400 font-bold">Oferta inativa</span>
+                    ) : (
+                      <>
+                        {obterTempoAtivo(ofertaSelecionada.data_primeiro_anuncio)} 
+                        {ofertaSelecionada.data_primeiro_anuncio && ` (desde ${ofertaSelecionada.data_primeiro_anuncio.split('-').reverse().join('/')})`}
+                      </>
+                    )}
                   </span>
                 </div>
               </div>
