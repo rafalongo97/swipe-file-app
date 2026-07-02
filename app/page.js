@@ -145,6 +145,7 @@ export default function Home() {
         ...formData,
         valor_front: cleanValue
       });
+      return;
     } else {
       setFormData({
         ...formData,
@@ -175,6 +176,21 @@ export default function Home() {
   };
 
   const handleBumpFieldChange = (index, field, value) => {
+    if (field === 'valor') {
+      // Formata como valor monetário com vírgula
+      let cleanValue = value.replace('.', ',');
+      cleanValue = cleanValue.replace(/[^0-9,]/g, '');
+      const parts = cleanValue.split(',');
+      if (parts.length > 2) {
+        cleanValue = parts[0] + ',' + parts.slice(1).join('');
+      }
+      setOrderBumps(prev => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], valor: cleanValue };
+        return updated;
+      });
+      return;
+    }
     setOrderBumps(prev => {
       const updated = [...prev];
       updated[index] = {
@@ -248,8 +264,11 @@ export default function Home() {
       valor: sanitizeNumber(bump.valor)
     }));
 
+    // Remove campos legados/inexistentes da tabela atual
+    const { valor_upsell_maior, valor_desconto, valor_principal, valor_upsell, link_checkout_upsell, ...cleanFormData } = formData;
+
     const payload = {
-      ...formData,
+      ...cleanFormData,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
       nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : ''
@@ -259,17 +278,22 @@ export default function Home() {
 
     // 4. Envio (Condicional: Update se tiver editId, senão Insert)
     let dbError = null;
+    let rowsAffected = 0;
     if (editId) {
-      const { error } = await supabase
+      const { error, data: updateData } = await supabase
         .from('ofertas_swipe_file')
         .update(payload)
-        .eq('id', editId);
+        .eq('id', editId)
+        .select();
       dbError = error;
+      rowsAffected = updateData ? updateData.length : 0;
     } else {
-      const { error } = await supabase
+      const { error, data: insertData } = await supabase
         .from('ofertas_swipe_file')
-        .insert([payload]);
+        .insert([payload])
+        .select();
       dbError = error;
+      rowsAffected = insertData ? insertData.length : 0;
     }
 
     if (dbError) {
@@ -277,6 +301,12 @@ export default function Home() {
       setMensagem({ 
         type: 'error', 
         text: `Erro ao salvar a oferta: ${dbError.message}` 
+      });
+    } else if (editId && rowsAffected === 0) {
+      console.error("Update bloqueado pelo RLS - 0 linhas afetadas");
+      setMensagem({ 
+        type: 'error', 
+        text: 'Erro de permissão: não foi possível salvar as alterações. Por favor, entre em contato com o suporte.' 
       });
     } else {
       setMensagem({ 
@@ -622,8 +652,8 @@ export default function Home() {
                           Valor do Bump #{index + 1} (R$)
                         </label>
                         <input 
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           value={bump.valor}
                           onChange={(e) => handleBumpFieldChange(index, 'valor', e.target.value)}
                           placeholder="0,00"
