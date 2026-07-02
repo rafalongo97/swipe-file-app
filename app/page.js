@@ -14,6 +14,25 @@ const NICHOS_CONFIG = {
 }; // Configuração de Nichos e Subnichos do Swipe File
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const isDarkTheme = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDark(true);
+    }
+  };
+
   const [carregandoAuth, setCarregandoAuth] = useState(true);
   const [carregandoDados, setCarregandoDados] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -405,6 +424,15 @@ export default function Home() {
             </div>
             
             <nav className="flex items-center gap-6">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
+                title={isDark ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
+                aria-label="Alternar Tema"
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
               <a href="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
                 Dashboard
               </a>
