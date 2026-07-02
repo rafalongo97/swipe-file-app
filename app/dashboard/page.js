@@ -14,6 +14,11 @@ export default function Dashboard() {
   const [filtroNicho, setFiltroNicho] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
 
+  // Estados de exclusão
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+
   useEffect(() => {
     async function carregarDados() {
       // Verifica o cadeado primeiro
@@ -86,6 +91,24 @@ export default function Dashboard() {
   const formatarPreco = (valor) => {
     if (valor === null || valor === undefined || valor === "") return '-';
     return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  };
+
+  const handleExcluir = async () => {
+    if (deleteConfirmText.toLowerCase() !== 'excluir') return;
+    setExcluindo(true);
+    const { error } = await supabase
+      .from('ofertas_swipe_file')
+      .delete()
+      .eq('id', ofertaSelecionada.id);
+    if (error) {
+      alert('Erro ao excluir: ' + error.message);
+    } else {
+      setOfertas(prev => prev.filter(o => o.id !== ofertaSelecionada.id));
+      setOfertaSelecionada(null);
+    }
+    setExcluindo(false);
+    setShowDeleteConfirm(false);
+    setDeleteConfirmText('');
   };
 
   const renderOrderBumpsModal = () => {
@@ -384,20 +407,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Biblioteca de Anúncios link row */}
-              {ofertaSelecionada.link_biblioteca_anuncios && (
-                <div className="bg-indigo-50/40 p-3.5 rounded-lg border border-indigo-100/50">
-                  <span className="text-xs font-semibold text-indigo-500 uppercase tracking-wider block mb-1">Biblioteca de Anúncios</span>
-                  <a 
-                    href={ofertaSelecionada.link_biblioteca_anuncios} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-sm font-bold text-indigo-700 hover:text-indigo-800 underline break-all block"
-                  >
-                    {ofertaSelecionada.link_biblioteca_anuncios} ↗
-                  </a>
-                </div>
-              )}
+              {/* (Biblioteca de Anúncios agora apenas no rodapé) */}
+
 
               {/* Pricing Cards */}
               <div>
@@ -420,45 +431,99 @@ export default function Dashboard() {
             </div>
 
             {/* Footer with links */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-wrap sm:flex-nowrap gap-3">
-              <a 
-                href={`/?edit=${ofertaSelecionada.id}`}
-                className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 text-center font-bold py-2.5 px-6 rounded-lg text-sm transition"
-              >
-                ✏️ Editar Oferta
-              </a>
-              {ofertaSelecionada.link_site && (
+            <div className="border-t border-gray-100 bg-gray-50">
+              {/* Linha secundária: Editar e Excluir */}
+              <div className="px-6 pt-3 pb-2 flex items-center gap-4">
                 <a 
-                  href={ofertaSelecionada.link_site}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  href={`/?edit=${ofertaSelecionada.id}`}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600 transition"
                 >
-                  🔗 Ver Site / LP
+                  ✏️ Editar oferta
                 </a>
-              )}
-              {ofertaSelecionada.link_checkout && (
-                <a 
-                  href={ofertaSelecionada.link_checkout}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                <button
+                  onClick={() => { setShowDeleteConfirm(true); setDeleteConfirmText(''); }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-red-400 hover:text-red-600 transition"
                 >
-                  💳 Checkout Principal ↗
-                </a>
-              )}
-              {ofertaSelecionada.link_biblioteca_anuncios && (
-                <a 
-                  href={ofertaSelecionada.link_biblioteca_anuncios}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
-                >
-                  📢 Biblioteca de Anúncios ↗
-                </a>
-              )}
+                  🗑️ Excluir oferta
+                </button>
+              </div>
+              {/* Linha principal: links de acesso rápido */}
+              <div className="px-4 pb-4 flex flex-wrap gap-2">
+                {ofertaSelecionada.link_site && (
+                  <a 
+                    href={ofertaSelecionada.link_site}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-gray-800 hover:bg-gray-900 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    🔗 Ver Site / LP
+                  </a>
+                )}
+                {ofertaSelecionada.link_checkout && (
+                  <a 
+                    href={ofertaSelecionada.link_checkout}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    💳 Checkout Principal ↗
+                  </a>
+                )}
+                {ofertaSelecionada.link_biblioteca_anuncios && (
+                  <a 
+                    href={ofertaSelecionada.link_biblioteca_anuncios}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    📢 Biblioteca de Anúncios ↗
+                  </a>
+                )}
+              </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
+      {showDeleteConfirm && ofertaSelecionada && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-red-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-xl">🗑️</div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Excluir oferta</h3>
+                <p className="text-xs text-gray-500">Esta ação não pode ser desfeita.</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-700 mb-4">
+              Você está prestes a excluir permanentemente <strong>{ofertaSelecionada.nome_produto}</strong>.
+            </p>
+            <p className="text-xs text-gray-500 mb-2">Para confirmar, digite <strong className="text-red-600">excluir</strong> abaixo:</p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="excluir"
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none text-sm font-medium mb-4 transition"
+              autoFocus
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
+                className="flex-1 py-2.5 rounded-lg border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluir}
+                disabled={deleteConfirmText.toLowerCase() !== 'excluir' || excluindo}
+                className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                {excluindo ? 'Excluindo...' : 'Confirmar exclusão'}
+              </button>
+            </div>
           </div>
         </div>
       )}

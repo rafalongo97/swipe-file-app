@@ -201,7 +201,32 @@ export default function Home() {
     });
   };
 
+  // Auto-formata o preço para X,XX ao sair do campo
+  const handleValorFrontBlur = () => {
+    if (formData.valor_front) {
+      const num = parseFloat(formData.valor_front.replace(',', '.'));
+      if (!isNaN(num)) {
+        setFormData(prev => ({ ...prev, valor_front: num.toFixed(2).replace('.', ',') }));
+      }
+    }
+  };
+
+  const handleBumpValorBlur = (index) => {
+    const bump = orderBumps[index];
+    if (bump && bump.valor !== '' && bump.valor !== undefined) {
+      const num = parseFloat(bump.valor.toString().replace(',', '.'));
+      if (!isNaN(num)) {
+        setOrderBumps(prev => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], valor: num.toFixed(2).replace('.', ',') };
+          return updated;
+        });
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setSalvando(true);
     setMensagem({ type: '', text: '' });
@@ -584,6 +609,7 @@ export default function Home() {
                       name="valor_front" 
                       value={formData.valor_front} 
                       onChange={handleChange} 
+                      onBlur={handleValorFrontBlur}
                       required
                       placeholder="0,00"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
@@ -656,6 +682,7 @@ export default function Home() {
                           inputMode="decimal"
                           value={bump.valor}
                           onChange={(e) => handleBumpFieldChange(index, 'valor', e.target.value)}
+                          onBlur={() => handleBumpValorBlur(index)}
                           placeholder="0,00"
                           className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm font-medium"
                         />
