@@ -96,12 +96,16 @@ export default function Dashboard() {
   const handleExcluir = async () => {
     if (deleteConfirmText.toLowerCase() !== 'excluir') return;
     setExcluindo(true);
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from('ofertas_swipe_file')
       .delete()
-      .eq('id', ofertaSelecionada.id);
+      .eq('id', ofertaSelecionada.id)
+      .select();
+      
     if (error) {
       alert('Erro ao excluir: ' + error.message);
+    } else if (!data || data.length === 0) {
+      alert('Erro de permissão (RLS): A exclusão foi bloqueada pelo banco de dados. Para corrigir, execute este SQL no Editor SQL do seu painel do Supabase:\n\nCREATE POLICY "Allow authenticated delete" ON "public"."ofertas_swipe_file" FOR DELETE TO authenticated USING (true);');
     } else {
       setOfertas(prev => prev.filter(o => o.id !== ofertaSelecionada.id));
       setOfertaSelecionada(null);

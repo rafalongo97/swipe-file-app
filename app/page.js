@@ -95,7 +95,12 @@ export default function Home() {
             try {
               const parsed = JSON.parse(data.nomes_order_bumps);
               if (Array.isArray(parsed)) {
-                parsedBumps = parsed;
+                parsedBumps = parsed.map(bump => ({
+                  nome: bump.nome,
+                  valor: bump.valor !== null && bump.valor !== undefined && bump.valor !== ''
+                    ? parseFloat(bump.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    : ''
+                }));
               }
             } catch (e) {
               // Formato antigo/legado (texto simples separado por vírgula)
@@ -132,18 +137,19 @@ export default function Home() {
         subnicho: '' // Zera o subnicho se o nicho for alterado
       });
     } else if (name === 'valor_front') {
-      // Substitui ponto por vírgula em tempo real e impede caracteres não numéricos/separadores
-      let cleanValue = value.replace('.', ',');
-      // Remove qualquer caractere que não seja número ou vírgula
-      cleanValue = cleanValue.replace(/[^0-9,]/g, '');
-      // Garante apenas uma vírgula
-      const parts = cleanValue.split(',');
-      if (parts.length > 2) {
-        cleanValue = parts[0] + ',' + parts.slice(1).join('');
+      const digits = value.replace(/\D/g, '');
+      if (!digits) {
+        setFormData({
+          ...formData,
+          valor_front: ''
+        });
+        return;
       }
+      const num = parseInt(digits, 10) / 100;
+      const formatted = num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       setFormData({
         ...formData,
-        valor_front: cleanValue
+        valor_front: formatted
       });
       return;
     } else {
@@ -177,16 +183,20 @@ export default function Home() {
 
   const handleBumpFieldChange = (index, field, value) => {
     if (field === 'valor') {
-      // Formata como valor monetário com vírgula
-      let cleanValue = value.replace('.', ',');
-      cleanValue = cleanValue.replace(/[^0-9,]/g, '');
-      const parts = cleanValue.split(',');
-      if (parts.length > 2) {
-        cleanValue = parts[0] + ',' + parts.slice(1).join('');
+      const digits = value.replace(/\D/g, '');
+      if (!digits) {
+        setOrderBumps(prev => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], valor: '' };
+          return updated;
+        });
+        return;
       }
+      const num = parseInt(digits, 10) / 100;
+      const formatted = num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       setOrderBumps(prev => {
         const updated = [...prev];
-        updated[index] = { ...updated[index], valor: cleanValue };
+        updated[index] = { ...updated[index], valor: formatted };
         return updated;
       });
       return;
@@ -272,7 +282,9 @@ export default function Home() {
     // 3. Correção de Erro Numérico: converter strings vazias ou inválidas para null
     const sanitizeNumber = (val) => {
       if (val === "" || val === undefined || val === null) return null;
-      const valStr = typeof val === 'string' ? val.replace(',', '.') : val.toString();
+      const valStr = typeof val === 'string' 
+        ? val.replace(/\./g, '').replace(',', '.') 
+        : val.toString();
       const parsed = parseFloat(valStr);
       return isNaN(parsed) ? null : parsed;
     };
