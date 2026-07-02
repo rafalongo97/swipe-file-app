@@ -81,7 +81,7 @@ export default function Home() {
             link_site: data.link_site || '',
             link_checkout: data.link_checkout || '',
             link_biblioteca_anuncios: data.link_biblioteca_anuncios || '',
-            valor_front: data.valor_front !== null && data.valor_front !== undefined ? data.valor_front.toString() : '',
+            valor_front: data.valor_front !== null && data.valor_front !== undefined ? parseFloat(data.valor_front).toFixed(2).replace('.', ',') : '',
             qtd_order_bump: data.qtd_order_bump !== null && data.qtd_order_bump !== undefined ? data.qtd_order_bump : 0,
             nomes_order_bumps: data.nomes_order_bumps || '',
             formato_entrega: data.formato_entrega || 'Vídeo'
@@ -130,6 +130,20 @@ export default function Home() {
         ...formData,
         nicho: value,
         subnicho: '' // Zera o subnicho se o nicho for alterado
+      });
+    } else if (name === 'valor_front') {
+      // Substitui ponto por vírgula em tempo real e impede caracteres não numéricos/separadores
+      let cleanValue = value.replace('.', ',');
+      // Remove qualquer caractere que não seja número ou vírgula
+      cleanValue = cleanValue.replace(/[^0-9,]/g, '');
+      // Garante apenas uma vírgula
+      const parts = cleanValue.split(',');
+      if (parts.length > 2) {
+        cleanValue = parts[0] + ',' + parts.slice(1).join('');
+      }
+      setFormData({
+        ...formData,
+        valor_front: cleanValue
       });
     } else {
       setFormData({
@@ -184,7 +198,7 @@ export default function Home() {
       { key: 'data_primeiro_anuncio', label: 'Data do Primeiro Anúncio' },
       { key: 'tipo_funil', label: 'Tipo de Funil' },
       { key: 'formato_entrega', label: 'Formato de Entrega' },
-      { key: 'valor_front', label: 'Valor do Front' }
+      { key: 'valor_front', label: 'Preço Front' }
     ];
 
     for (const campo of camposObrigatorios) {
@@ -217,7 +231,8 @@ export default function Home() {
     // 3. Correção de Erro Numérico: converter strings vazias ou inválidas para null
     const sanitizeNumber = (val) => {
       if (val === "" || val === undefined || val === null) return null;
-      const parsed = parseFloat(val);
+      const valStr = typeof val === 'string' ? val.replace(',', '.') : val.toString();
+      const parsed = parseFloat(valStr);
       return isNaN(parsed) ? null : parsed;
     };
 
@@ -533,10 +548,9 @@ export default function Home() {
                 {/* Preço */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Front-end (R$) <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Preço Front <span className="text-red-500">*</span></label>
                     <input 
-                      type="number" 
-                      step="0.01" 
+                      type="text" 
                       name="valor_front" 
                       value={formData.valor_front} 
                       onChange={handleChange} 

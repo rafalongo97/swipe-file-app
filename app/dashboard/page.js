@@ -389,7 +389,7 @@ export default function Dashboard() {
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100/50">
-                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Front-end</span>
+                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Preço Front</span>
                     <span className="text-sm font-bold text-blue-700 mt-1 block">
                       {formatarPreco(ofertaSelecionada.valor_front)}
                     </span>
