@@ -344,8 +344,14 @@ export default function Dashboard() {
 
       {/* MODAL DE DETALHES DA OFERTA */}
       {ofertaSelecionada && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[90vh]">
+        <div 
+          onClick={() => setOfertaSelecionada(null)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[90vh]"
+          >
             
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
@@ -492,8 +498,14 @@ export default function Dashboard() {
 
       {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       {showDeleteConfirm && ofertaSelecionada && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-red-100 p-6">
+        <div 
+          onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-red-100 p-6"
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-xl">🗑️</div>
               <div>
