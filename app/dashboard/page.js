@@ -384,6 +384,21 @@ export default function Dashboard() {
                 </div>
               </div>
 
+              {/* Biblioteca de Anúncios link row */}
+              {ofertaSelecionada.link_biblioteca_anuncios && (
+                <div className="bg-indigo-50/40 p-3.5 rounded-lg border border-indigo-100/50">
+                  <span className="text-xs font-semibold text-indigo-500 uppercase tracking-wider block mb-1">Biblioteca de Anúncios</span>
+                  <a 
+                    href={ofertaSelecionada.link_biblioteca_anuncios} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-sm font-bold text-indigo-700 hover:text-indigo-800 underline break-all block"
+                  >
+                    {ofertaSelecionada.link_biblioteca_anuncios} ↗
+                  </a>
+                </div>
+              )}
+
               {/* Pricing Cards */}
               <div>
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
