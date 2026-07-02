@@ -9,7 +9,8 @@ const NICHOS_CONFIG = {
   'Saúde & Bem-estar': ['Emagrecimento', 'Fitness / Musculação', 'Dietas / Nutrição', 'Saúde Mental', 'Suplementos'],
   'Relacionamentos': ['Sedução / Conquista', 'Casamento / Família', 'Amizades / Networking'],
   'Desenvolvimento Pessoal': ['Produtividade', 'Autoajuda', 'Oratória / Inteligência Emocional', 'Espiritualidade'],
-  'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI', 'Profissões Industriais (Metalúrgica, Elétrica, Solda, etc.)']
+  'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI', 'Profissões Industriais (Metalúrgica, Elétrica, Solda, etc.)'],
+  'Religioso': ['Devocionais / Estudos Bíblicos', 'Teologia', 'Orações & Mensagens', 'Família & Relacionamento Cristão', 'Música / Ministério de Louvor', 'Mentalidade / Fé']
 };
 
 export default function Home() {
