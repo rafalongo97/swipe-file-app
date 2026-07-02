@@ -27,11 +27,8 @@ export default function Home() {
     tipo_funil: 'DR', 
     link_site: '', 
     link_checkout: '', 
-    link_checkout_upsell: '',
+    link_biblioteca_anuncios: '',
     valor_front: '', 
-    valor_principal: '',
-    valor_desconto: '', 
-    valor_upsell: '',
     qtd_order_bump: 0, 
     nomes_order_bumps: '', 
     formato_entrega: 'Vídeo'
@@ -83,11 +80,8 @@ export default function Home() {
             tipo_funil: data.tipo_funil || 'DR',
             link_site: data.link_site || '',
             link_checkout: data.link_checkout || '',
-            link_checkout_upsell: data.link_checkout_upsell || '',
+            link_biblioteca_anuncios: data.link_biblioteca_anuncios || '',
             valor_front: data.valor_front !== null && data.valor_front !== undefined ? data.valor_front.toString() : '',
-            valor_principal: data.valor_principal !== null && data.valor_principal !== undefined ? data.valor_principal.toString() : '',
-            valor_desconto: data.valor_desconto !== null && data.valor_desconto !== undefined ? data.valor_desconto.toString() : '',
-            valor_upsell: (data.valor_upsell !== null && data.valor_upsell !== undefined ? data.valor_upsell : (data.valor_upsell_maior !== null && data.valor_upsell_maior !== undefined ? data.valor_upsell_maior : '')).toString(),
             qtd_order_bump: data.qtd_order_bump !== null && data.qtd_order_bump !== undefined ? data.qtd_order_bump : 0,
             nomes_order_bumps: data.nomes_order_bumps || '',
             formato_entrega: data.formato_entrega || 'Vídeo'
@@ -242,10 +236,6 @@ export default function Home() {
     const payload = {
       ...formData,
       valor_front: sanitizeNumber(formData.valor_front),
-      valor_principal: sanitizeNumber(formData.valor_principal),
-      valor_desconto: sanitizeNumber(formData.valor_desconto),
-      valor_upsell: sanitizeNumber(formData.valor_upsell),
-      valor_upsell_maior: sanitizeNumber(formData.valor_upsell), // Mantém compatibilidade com coluna anterior
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
       nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : ''
     };
@@ -292,11 +282,8 @@ export default function Home() {
           tipo_funil: 'DR', 
           link_site: '', 
           link_checkout: '', 
-          link_checkout_upsell: '',
+          link_biblioteca_anuncios: '',
           valor_front: '', 
-          valor_principal: '',
-          valor_desconto: '', 
-          valor_upsell: '',
           qtd_order_bump: 0, 
           nomes_order_bumps: '', 
           formato_entrega: 'Vídeo'
@@ -524,15 +511,27 @@ export default function Home() {
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
+
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Link da Biblioteca de Anúncios</label>
+                  <input 
+                    type="url" 
+                    name="link_biblioteca_anuncios" 
+                    value={formData.link_biblioteca_anuncios} 
+                    onChange={handleChange} 
+                    placeholder="https://www.facebook.com/ads/library/..."
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Section 3: Precificação e Funil de Vendas */}
+            {/* Section 3: Precificação e Checkout */}
             <div className="pt-6 border-t border-gray-100">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">3. Precificação e Funil de Vendas</h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">3. Precificação e Checkout</h3>
               <div className="space-y-6">
-                {/* Preços */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {/* Preço */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Front-end (R$) <span className="text-red-500">*</span></label>
                     <input 
@@ -547,46 +546,6 @@ export default function Home() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Principal (R$)</label>
-                    <input 
-                      type="number" 
-                      step="0.01" 
-                      name="valor_principal" 
-                      value={formData.valor_principal} 
-                      onChange={handleChange} 
-                      placeholder="0,00"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Com Desconto (R$)</label>
-                    <input 
-                      type="number" 
-                      step="0.01" 
-                      name="valor_desconto" 
-                      value={formData.valor_desconto} 
-                      onChange={handleChange} 
-                      placeholder="0,00"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Valor Upsell (R$)</label>
-                    <input 
-                      type="number" 
-                      step="0.01" 
-                      name="valor_upsell" 
-                      value={formData.valor_upsell} 
-                      onChange={handleChange} 
-                      placeholder="0,00"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                    />
-                  </div>
-                </div>
-
-                {/* Checkouts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Link do Checkout Principal</label>
                     <input 
                       type="url" 
@@ -594,17 +553,6 @@ export default function Home() {
                       value={formData.link_checkout} 
                       onChange={handleChange} 
                       placeholder="https://checkout.principal.com"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Link do Checkout do Upsell</label>
-                    <input 
-                      type="url" 
-                      name="link_checkout_upsell" 
-                      value={formData.link_checkout_upsell} 
-                      onChange={handleChange} 
-                      placeholder="https://checkout.upsell.com"
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                     />
                   </div>
