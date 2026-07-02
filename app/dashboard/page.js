@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [filtroBusca, setFiltroBusca] = useState('');
   const [filtroNicho, setFiltroNicho] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
+  const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
 
   // Estados de exclusão
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -86,7 +87,10 @@ export default function Dashboard() {
       matchStatus = oferta.status_ativo === false;
     }
 
-    return matchBusca && matchNicho && matchStatus;
+    // 4. Filtro por Status do Funil
+    const matchFunilStatus = selectedFunilStatus === 'Todas' || (oferta.status_funil || 'Em análise') === selectedFunilStatus;
+
+    return matchBusca && matchNicho && matchStatus && matchFunilStatus;
   });
 
   const obterTempoAtivo = (dataPrimeiroAnuncio) => {
@@ -289,26 +293,45 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              {/* Filtro Status */}
-              <div className="w-full sm:w-40">
-                <select
-                  value={filtroStatus}
-                  onChange={(e) => setFiltroStatus(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
-                >
-                  <option value="todos">Status: Todos</option>
-                  <option value="ativos">Ativo</option>
-                  <option value="inativos">Inativo (Off)</option>
-                </select>
+              {/* Status & Funnel Filters Container (stacked on mobile, side-by-side on desktop) */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                {/* Filtro Status */}
+                <div className="w-full sm:w-40">
+                  <select
+                    value={filtroStatus}
+                    onChange={(e) => setFiltroStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                  >
+                    <option value="todos">Status: Todos</option>
+                    <option value="ativos">Ativo</option>
+                    <option value="inativos">Inativo (Off)</option>
+                  </select>
+                </div>
+
+                {/* Filtro de Funil */}
+                <div className="w-full sm:w-44">
+                  <select
+                    value={selectedFunilStatus}
+                    onChange={(e) => setSelectedFunilStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                  >
+                    <option value="Todas">Funil: Todas</option>
+                    <option value="Em análise">Em análise</option>
+                    <option value="Para modelar">Para modelar</option>
+                    <option value="Já testei">Já testei</option>
+                    <option value="Descartado">Descartado</option>
+                  </select>
+                </div>
               </div>
 
               {/* Botão de Limpar Filtros */}
-              {(filtroBusca || filtroNicho || filtroStatus !== 'todos') && (
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas') && (
                 <button
                   onClick={() => {
                     setFiltroBusca('');
                     setFiltroNicho('');
                     setFiltroStatus('todos');
+                    setSelectedFunilStatus('Todas');
                   }}
                   className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
                 >
@@ -347,6 +370,7 @@ export default function Dashboard() {
                 setFiltroBusca('');
                 setFiltroNicho('');
                 setFiltroStatus('todos');
+                setSelectedFunilStatus('Todas');
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
             >
