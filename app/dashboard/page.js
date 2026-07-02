@@ -134,6 +134,26 @@ export default function Dashboard() {
     setDeleteConfirmText('');
   };
 
+  const renderStatusFunilBadge = (status) => {
+    const val = status || 'Em análise';
+    let classes = 'bg-gray-50 text-gray-700 border-gray-200';
+    if (val === 'Em análise') {
+      classes = 'bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-900/50';
+    } else if (val === 'Para modelar') {
+      classes = 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900/50';
+    } else if (val === 'Já testei') {
+      classes = 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900/50';
+    } else if (val === 'Descartado') {
+      classes = 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900/50';
+    }
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${classes}`}>
+        {val}
+      </span>
+    );
+  };
+
   const renderOrderBumpsModal = () => {
     if (!ofertaSelecionada.nomes_order_bumps) {
       return <p className="text-xs text-gray-500 italic mt-1">Nenhum order bump registrado para esta oferta.</p>;
@@ -340,6 +360,7 @@ export default function Dashboard() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Nome da Oferta</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Status do Funil</th>
                     <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Tempo Ativo</th>
                   </tr>
                 </thead>
@@ -355,6 +376,20 @@ export default function Dashboard() {
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           <span className="text-base">📁</span> {oferta.nome_produto}
                         </div>
+                        {oferta.tags && (
+                          <div className="flex flex-wrap gap-1 mt-1 pl-7">
+                            {oferta.tags.split(',').map((tag, i) => (
+                              <span key={i} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
+                                {tag.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Status do Funil */}
+                      <td className="p-4">
+                        {renderStatusFunilBadge(oferta.status_funil)}
                       </td>
 
                       {/* Tempo Ativo */}
@@ -445,7 +480,27 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* (Biblioteca de Anúncios agora apenas no rodapé) */}
+              {/* Funnel Status & Tags */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100 flex flex-col justify-center items-start">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Status do Funil</span>
+                  {renderStatusFunilBadge(ofertaSelecionada.status_funil)}
+                </div>
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Tags</span>
+                  <div className="flex flex-wrap gap-1">
+                    {ofertaSelecionada.tags ? (
+                      ofertaSelecionada.tags.split(',').map((tag, i) => (
+                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
+                          {tag.trim()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-500 italic">Nenhuma tag registrada</span>
+                    )}
+                  </div>
+                </div>
+              </div>
 
 
               {/* Pricing Cards */}

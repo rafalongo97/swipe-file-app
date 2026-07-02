@@ -51,7 +51,9 @@ export default function Home() {
     valor_front: '', 
     qtd_order_bump: 0, 
     nomes_order_bumps: '', 
-    formato_entrega: 'Vídeo'
+    formato_entrega: 'Vídeo',
+    status_funil: 'Em análise',
+    tags: ''
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -104,7 +106,9 @@ export default function Home() {
             valor_front: data.valor_front !== null && data.valor_front !== undefined ? parseFloat(data.valor_front).toFixed(2).replace('.', ',') : '',
             qtd_order_bump: data.qtd_order_bump !== null && data.qtd_order_bump !== undefined ? data.qtd_order_bump : 0,
             nomes_order_bumps: data.nomes_order_bumps || '',
-            formato_entrega: data.formato_entrega || 'Vídeo'
+            formato_entrega: data.formato_entrega || 'Vídeo',
+            status_funil: data.status_funil || 'Em análise',
+            tags: data.tags || ''
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -388,7 +392,9 @@ export default function Home() {
           valor_front: '', 
           qtd_order_bump: 0, 
           nomes_order_bumps: '', 
-          formato_entrega: 'Vídeo'
+          formato_entrega: 'Vídeo',
+          status_funil: 'Em análise',
+          tags: ''
         });
         setOrderBumps([]);
       }
@@ -631,6 +637,33 @@ export default function Home() {
                     value={formData.link_biblioteca_anuncios} 
                     onChange={handleChange} 
                     placeholder="https://www.facebook.com/ads/library/..."
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Status do Funil <span className="text-red-500">*</span></label>
+                  <select 
+                    name="status_funil" 
+                    value={formData.status_funil} 
+                    onChange={handleChange} 
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
+                  >
+                    <option value="Em análise">Em análise</option>
+                    <option value="Para modelar">Para modelar</option>
+                    <option value="Já testei">Já testei</option>
+                    <option value="Descartado">Descartado</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tags</label>
+                  <input 
+                    type="text" 
+                    name="tags" 
+                    value={formData.tags} 
+                    onChange={handleChange} 
+                    placeholder="Ex: low-ticket, vsl, lancamento"
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
                 </div>
