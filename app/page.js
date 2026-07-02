@@ -11,7 +11,7 @@ const NICHOS_CONFIG = {
   'Desenvolvimento Pessoal': ['Produtividade', 'Autoajuda', 'Oratória / Inteligência Emocional', 'Espiritualidade'],
   'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI', 'Profissões Industriais (Metalúrgica, Elétrica, Solda, etc.)'],
   'Religioso': ['Devocionais / Estudos Bíblicos', 'Teologia', 'Orações & Mensagens', 'Família & Relacionamento Cristão', 'Música / Ministério de Louvor', 'Mentalidade / Fé']
-};
+}; // Configuração de Nichos e Subnichos do Swipe File
 
 export default function Home() {
   const [carregandoAuth, setCarregandoAuth] = useState(true);
