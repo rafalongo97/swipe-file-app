@@ -85,9 +85,14 @@ body {
 /* Cabeçalhos internos de modal, rodapés e divisões */
 .dark .bg-gray-50\/50,
 .dark .bg-gray-50\/40,
-.dark .bg-gray-50 {
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
   background-color: #1d1e24 !important;
   border-color: #2a2b33 !important;
+}
+
+.dark .bg-gray-100:hover {
+  background-color: #25262e !important;
 }
 
 /* Textos gerais do modo dark */
