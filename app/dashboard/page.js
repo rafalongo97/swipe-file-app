@@ -136,19 +136,19 @@ export default function Dashboard() {
 
   const renderStatusFunilBadge = (status) => {
     const val = status || 'Em análise';
-    let classes = 'bg-gray-50 text-gray-700 border-gray-200';
+    let classes = 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     if (val === 'Em análise') {
-      classes = 'bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-900/50';
+      classes = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300';
     } else if (val === 'Para modelar') {
-      classes = 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900/50';
+      classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
     } else if (val === 'Já testei') {
-      classes = 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900/50';
+      classes = 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300';
     } else if (val === 'Descartado') {
-      classes = 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900/50';
+      classes = 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     }
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${classes}`}>
+      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${classes}`}>
         {val}
       </span>
     );
