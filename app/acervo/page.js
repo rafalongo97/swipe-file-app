@@ -14,6 +14,20 @@ const NICHOS_LIST = [
   'Educação e Desenvolvimento'
 ];
 
+const NICHO_COLORS = {
+  'Ganhar Dinheiro': 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900/50',
+  'Saúde & Bem-estar': 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-900/50',
+  'Relacionamentos': 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-900/50',
+  'Desenvolvimento Pessoal': 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900/50',
+  'Hobbies & Profissões': 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-900/50',
+  'Religioso': 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-100 dark:border-indigo-900/50',
+  'Educação e Desenvolvimento': 'bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border-teal-100 dark:border-teal-900/50'
+};
+
+function getNichoColorClass(nicho) {
+  return NICHO_COLORS[nicho] || 'bg-gray-50 dark:bg-gray-950/40 text-gray-700 dark:text-gray-300 border-gray-100 dark:border-gray-900/50';
+}
+
 export default function AcervoPage() {
   const [isDark, setIsDark] = useState(false);
 
@@ -261,12 +275,12 @@ export default function AcervoPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="space-y-8">
           {/* Cadastro Form */}
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm h-fit">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Adicionar Novo Acervo</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div className="md:col-span-4">
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Nome do Acervo <span className="text-red-500">*</span></label>
                 <input 
                   type="text" 
@@ -279,7 +293,7 @@ export default function AcervoPage() {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-4">
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">URL do Drive <span className="text-red-500">*</span></label>
                 <input 
                   type="url" 
@@ -292,7 +306,7 @@ export default function AcervoPage() {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Nicho <span className="text-red-500">*</span></label>
                 <select 
                   name="nicho"
@@ -307,25 +321,27 @@ export default function AcervoPage() {
                 </select>
               </div>
 
-              <button
-                type="submit"
-                disabled={salvando}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 cursor-pointer disabled:opacity-50 text-sm flex justify-center items-center gap-2"
-              >
-                {salvando ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    <span>Salvando...</span>
-                  </>
-                ) : (
-                  <span>Cadastrar Drive</span>
-                )}
-              </button>
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  disabled={salvando}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 cursor-pointer disabled:opacity-50 text-sm flex justify-center items-center gap-2 h-[42px]"
+                >
+                  {salvando ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>Salvando...</span>
+                    </>
+                  ) : (
+                    <span>Cadastrar Drive</span>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
 
           {/* Listagem */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Drives Compartilhados</h2>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold">{acervos.length} cadastrados</span>
@@ -413,7 +429,7 @@ export default function AcervoPage() {
                       <tr key={acervo.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150">
                         {/* Nicho Badge */}
                         <td className="p-4">
-                          <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 text-xs font-bold border border-blue-100 dark:border-blue-900/50">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${getNichoColorClass(acervo.nicho)}`}>
                             {acervo.nicho}
                           </span>
                         </td>
