@@ -13,6 +13,15 @@ export default function Admin() {
   const [isDark, setIsDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // States para o Popup de Ações
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [novaSenha, setNovaSenha] = useState('');
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+  const [confirmDeleteInput, setConfirmDeleteInput] = useState('');
+  const [excluindoUser, setExcluindoUser] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   useEffect(() => {
     const isDarkTheme = document.documentElement.classList.contains('dark');
     setIsDark(isDarkTheme);
@@ -81,35 +90,73 @@ export default function Admin() {
     }
   };
 
-  const handleExcluirProfile = async (profileId, nomeUser) => {
-    if (!confirm(`Deseja realmente excluir o perfil do usuário "${nomeUser}"? Esta ação removerá os dados de perfil dele no banco.`)) {
+  const handleAlterarSenhaAdmin = async (e) => {
+    e.preventDefault();
+    if (!usuarioSelecionado) return;
+    if (novaSenha.length < 6) {
+      alert('A senha deve conter no mínimo 6 caracteres.');
       return;
     }
-    setMensagem({ type: '', text: '' });
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', profileId);
 
-    if (error) {
-      alert('Erro ao excluir perfil: ' + error.message);
-    } else {
-      await carregarProfiles();
-      setMensagem({ type: 'success', text: `Perfil de "${nomeUser}" excluído com sucesso.` });
+    setSalvandoSenha(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/admin/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ userId: usuarioSelecionado.id, newPassword: novaSenha })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro desconhecido ao alterar senha');
+      }
+
+      alert('Senha updated com sucesso! 🚀');
+      setNovaSenha('');
+    } catch (err) {
+      alert(`Erro: ${err.message}`);
+    } finally {
+      setSalvandoSenha(false);
     }
   };
 
-  const handleResetarSenha = async (email) => {
-    setMensagem({ type: '', text: '' });
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getRedirectUrl('/configuracoes')
-    });
+  const handleConfirmExcluirAdmin = async () => {
+    if (!usuarioSelecionado) return;
+    if (confirmDeleteInput !== 'excluir') {
+      alert("Por favor, digite 'excluir' para confirmar.");
+      return;
+    }
 
-    if (error) {
-      alert('Erro ao solicitar redefinição: ' + error.message);
-    } else {
-      alert(`E-mail de redefinição de senha enviado com sucesso para ${email}!`);
-      setMensagem({ type: 'success', text: `Instruções de redefinição enviadas para ${email}` });
+    setExcluindoUser(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ userId: usuarioSelecionado.id })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro desconhecido ao excluir usuário');
+      }
+
+      alert('Usuário excluído com sucesso!');
+      setUsuarioSelecionado(null);
+      setShowDeleteConfirm(false);
+      setConfirmDeleteInput('');
+      await carregarProfiles();
+    } catch (err) {
+      alert(`Erro ao excluir: ${err.message}`);
+    } finally {
+      setExcluindoUser(false);
     }
   };
 
@@ -286,15 +333,18 @@ export default function Admin() {
                   <tr>
                     <th className="p-4 font-bold text-xs uppercase tracking-wider">Nome</th>
                     <th className="p-4 font-bold text-xs uppercase tracking-wider">E-mail</th>
-                    <th className="p-4 font-bold text-xs uppercase tracking-wider">Acesso</th>
-                    <th className="p-4 font-bold text-xs uppercase tracking-wider text-right">Ações</th>
+                    <th className="p-4 font-bold text-xs uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {profiles.map((profile) => (
-                    <tr key={profile.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150">
+                    <tr 
+                      key={profile.id} 
+                      onClick={() => setUsuarioSelecionado(profile)}
+                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150 cursor-pointer"
+                    >
                       <td className="p-4 font-semibold text-gray-900 dark:text-white">
-                        {profile.nome}
+                        {profile.nome || 'Sem nome'}
                       </td>
                       <td className="p-4 text-gray-700 dark:text-gray-300">
                         {profile.email}
@@ -306,40 +356,9 @@ export default function Admin() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-2.5 py-0.5 text-xs font-bold border border-red-100 dark:border-red-900/50">
-                            Bloqueado
+                            Inativo
                           </span>
                         )}
-                      </td>
-                      <td className="p-4 text-right flex items-center justify-end gap-2">
-                        {/* Botão de status de acesso */}
-                        <button
-                          onClick={() => handleToggleAcesso(profile.id, profile.status_acesso !== false)}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1 ${
-                            profile.status_acesso !== false
-                              ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-400'
-                              : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-900/50 dark:text-green-400'
-                          }`}
-                        >
-                          {profile.status_acesso !== false ? 'Bloquear' : 'Desbloquear'}
-                        </button>
-
-                        {/* Botão de resetar senha */}
-                        <button
-                          onClick={() => handleResetarSenha(profile.email)}
-                          className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer flex items-center gap-1"
-                        >
-                          Resetar Senha
-                        </button>
-
-                        {/* Botão de exclusão */}
-                        <button
-                          onClick={() => handleExcluirProfile(profile.id, profile.nome)}
-                          disabled={profile.email === 'rafael.longo97@gmail.com'}
-                          className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={profile.email === 'rafael.longo97@gmail.com' ? "Não é possível excluir a conta administrativa master" : "Excluir Usuário"}
-                        >
-                          Excluir
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -350,6 +369,177 @@ export default function Admin() {
         </div>
 
       </main>
+
+      {/* POPUP DE AÇÕES DO USUÁRIO */}
+      {usuarioSelecionado && (
+        <div 
+          onClick={() => {
+            setUsuarioSelecionado(null);
+            setShowDeleteConfirm(false);
+            setConfirmDeleteInput('');
+            setNovaSenha('');
+          }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[90vh]"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-150 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                  Ações do Usuário
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">Gerencie a conta selecionada</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setUsuarioSelecionado(null);
+                  setShowDeleteConfirm(false);
+                  setConfirmDeleteInput('');
+                  setNovaSenha('');
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 bg-gray-200/50 dark:bg-zinc-800 p-2 rounded-full transition cursor-pointer"
+                aria-label="Fechar"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="overflow-y-auto p-6 space-y-6">
+              {/* Informações */}
+              <div className="bg-gray-50 dark:bg-zinc-800/30 p-4 rounded-xl border border-gray-100 dark:border-zinc-800/80 space-y-2">
+                <p className="text-sm text-gray-700 dark:text-zinc-300">
+                  <strong>Nome:</strong> {usuarioSelecionado.nome || 'Sem nome'}
+                </p>
+                <p className="text-sm text-gray-700 dark:text-zinc-300">
+                  <strong>E-mail:</strong> {usuarioSelecionado.email}
+                </p>
+                <p className="text-sm text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
+                  <strong>Status:</strong>
+                  {usuarioSelecionado.status_acesso !== false ? (
+                    <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-2.5 py-0.5 text-xs font-bold border border-green-100 dark:border-green-900/50">
+                      Ativo
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-2.5 py-0.5 text-xs font-bold border border-red-100 dark:border-red-900/50">
+                      Inativo
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              {/* Botão de Toggle Status */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Controle de Acesso</h4>
+                <button
+                  onClick={async () => {
+                    await handleToggleAcesso(usuarioSelecionado.id, usuarioSelecionado.status_acesso !== false);
+                    setUsuarioSelecionado({
+                      ...usuarioSelecionado,
+                      status_acesso: !usuarioSelecionado.status_acesso
+                    });
+                  }}
+                  className={`w-full text-sm font-bold py-2.5 px-4 rounded-lg border transition cursor-pointer flex justify-center items-center gap-1.5 ${
+                    usuarioSelecionado.status_acesso !== false
+                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-400'
+                      : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-900/50 dark:text-green-400'
+                  }`}
+                >
+                  {usuarioSelecionado.status_acesso !== false ? '🚫 Bloquear Acesso' : '✅ Desbloquear Acesso'}
+                </button>
+              </div>
+
+              {/* Formulário Alterar Senha */}
+              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4">
+                <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Alterar Senha</h4>
+                <form onSubmit={handleAlterarSenhaAdmin} className="space-y-3">
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? "text" : "password"}
+                      value={novaSenha}
+                      onChange={(e) => setNovaSenha(e.target.value)}
+                      placeholder="Defina a nova senha"
+                      required
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition cursor-pointer"
+                      title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={salvandoSenha}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition disabled:opacity-50 text-sm cursor-pointer"
+                  >
+                    {salvandoSenha ? 'Alterando...' : 'Salvar Nova Senha'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Botão de Exclusão */}
+              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4">
+                <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Excluir Conta</h4>
+                
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={usuarioSelecionado.email === 'rafael.longo97@gmail.com'}
+                    className="w-full bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-2 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={usuarioSelecionado.email === 'rafael.longo97@gmail.com' ? "Não é possível excluir o administrador" : "Excluir Usuário"}
+                  >
+                    🗑️ Excluir Usuário
+                  </button>
+                ) : (
+                  <div className="space-y-3 bg-red-50/50 dark:bg-red-950/10 p-3 rounded-lg border border-red-100 dark:border-red-950/30">
+                    <p className="text-xs font-semibold text-red-700 dark:text-red-400">
+                      Esta ação é irreversível! Digite <strong>excluir</strong> abaixo para confirmar:
+                    </p>
+                    <input 
+                      type="text"
+                      value={confirmDeleteInput}
+                      onChange={(e) => setConfirmDeleteInput(e.target.value)}
+                      placeholder="Digite excluir"
+                      className="w-full px-3 py-1.5 rounded border border-red-300 dark:border-red-900/50 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white text-sm outline-none focus:ring-1 focus:ring-red-500"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setShowDeleteConfirm(false); setConfirmDeleteInput(''); }}
+                        className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 font-bold py-1.5 rounded text-xs transition cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleConfirmExcluirAdmin}
+                        disabled={confirmDeleteInput !== 'excluir' || excluindoUser}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded text-xs transition disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {excluindoUser ? 'Excluindo...' : 'Confirmar'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
