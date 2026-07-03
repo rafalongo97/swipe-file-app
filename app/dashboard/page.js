@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [filtroTempoAtivo, setFiltroTempoAtivo] = useState('Todas');
   const [filtroTipoOferta, setFiltroTipoOferta] = useState('Todas');
   const [apenasEscaladas, setApenasEscaladas] = useState(false);
+  const [filtroMercado, setFiltroMercado] = useState('Todos');
 
   // Estados de ordenação
   const [sortField, setSortField] = useState('created_at'); // 'nome_produto', 'tempo_ativo', 'created_at'
@@ -140,7 +141,10 @@ export default function Dashboard() {
     // 7. Filtro por Apenas Escaladas
     const matchEscaladas = !apenasEscaladas || oferta.esta_escalada === true;
 
-    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta && matchEscaladas;
+    // 8. Filtro por Idioma/Mercado
+    const matchMercado = filtroMercado === 'Todos' || (oferta.idioma_mercado || 'BR') === filtroMercado;
+
+    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta && matchEscaladas && matchMercado;
   });
 
   // Ordenação das ofertas filtradas
@@ -487,6 +491,22 @@ export default function Dashboard() {
                 </select>
               </div>
 
+              {/* Filtro Mercado */}
+              <div className="w-full sm:w-36">
+                <select
+                  value={filtroMercado}
+                  onChange={(e) => setFiltroMercado(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="Todos">Mercado: Todos</option>
+                  <option value="BR">BR</option>
+                  <option value="Latam">Latam</option>
+                  <option value="Inglês">Inglês</option>
+                  <option value="Francês">Francês</option>
+                  <option value="Italiano">Italiano</option>
+                </select>
+              </div>
+
               {/* Switch Apenas Escaladas (Integrado organicamente) */}
               <div className="w-full sm:w-auto flex items-center shrink-0 bg-gray-50 dark:bg-gray-800/40 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 h-[42px] shadow-sm">
                 <label className="relative flex items-center cursor-pointer select-none">
@@ -504,7 +524,7 @@ export default function Dashboard() {
               </div>
 
               {/* Botão de Limpar Filtros */}
-              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas' || filtroTipoOferta !== 'Todas' || apenasEscaladas) && (
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas' || filtroTipoOferta !== 'Todas' || apenasEscaladas || filtroMercado !== 'Todos') && (
                 <button
                   onClick={() => {
                     setFiltroBusca('');
@@ -514,6 +534,7 @@ export default function Dashboard() {
                     setFiltroTempoAtivo('Todas');
                     setFiltroTipoOferta('Todas');
                     setApenasEscaladas(false);
+                    setFiltroMercado('Todos');
                   }}
                   className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm h-[42px]"
                 >
@@ -556,6 +577,7 @@ export default function Dashboard() {
                 setFiltroTempoAtivo('Todas');
                 setFiltroTipoOferta('Todas');
                 setApenasEscaladas(false);
+                setFiltroMercado('Todos');
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
             >
@@ -569,6 +591,7 @@ export default function Dashboard() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Tipo</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Idioma</th>
                     <th className="p-4 text-left">
                       <button 
                         type="button"
@@ -600,6 +623,12 @@ export default function Dashboard() {
                       {/* Tipo de Oferta */}
                       <td className="p-4">
                         {renderTipoOfertaBadges(oferta)}
+                      </td>
+                      {/* Idioma/Mercado */}
+                      <td className="p-4">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 px-2.5 py-0.5 text-xs font-semibold border border-gray-200 dark:border-gray-700/50 shadow-sm">
+                          {oferta.idioma_mercado || 'BR'}
+                        </span>
                       </td>
                       {/* Produto */}
                       <td className="p-4">
@@ -710,8 +739,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Funnel & Delivery format */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Funnel, Delivery & Language/Market */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tipo de Funil</span>
                   <span className="text-sm font-bold text-blue-600">
@@ -721,6 +750,12 @@ export default function Dashboard() {
                 <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Formato de Entrega</span>
                   <span className="text-sm font-semibold text-gray-800">{ofertaSelecionada.formato_entrega}</span>
+                </div>
+                <div className="bg-gray-50 p-3.5 rounded-lg border border-gray-100 col-span-2 lg:col-span-1">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Idioma / Mercado</span>
+                  <span className="inline-flex items-center rounded-full bg-gray-200 text-gray-800 px-2.5 py-0.5 text-xs font-bold border border-gray-300">
+                    {ofertaSelecionada.idioma_mercado || 'BR'}
+                  </span>
                 </div>
               </div>
 

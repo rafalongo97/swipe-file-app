@@ -57,7 +57,8 @@ export default function Home() {
     tags: '',
     notas_modelagem: '',
     esta_escalada: false,
-    tipo_oferta: ['DR']
+    tipo_oferta: ['DR'],
+    idioma_mercado: 'BR'
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -122,7 +123,8 @@ export default function Home() {
             tags: data.tags || '',
             notas_modelagem: data.notas_modelagem || '',
             esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false,
-            tipo_oferta: arrayTipoOferta
+            tipo_oferta: arrayTipoOferta,
+            idioma_mercado: data.idioma_mercado || 'BR'
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -426,7 +428,8 @@ export default function Home() {
           tags: '',
           notas_modelagem: '',
           esta_escalada: false,
-          tipo_oferta: ['DR']
+          tipo_oferta: ['DR'],
+          idioma_mercado: 'BR'
         });
         setOrderBumps([]);
       }
@@ -642,6 +645,23 @@ export default function Home() {
                       1X1
                     </label>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Idioma/Mercado <span className="text-red-500">*</span></label>
+                  <select 
+                    name="idioma_mercado" 
+                    value={formData.idioma_mercado} 
+                    onChange={handleChange} 
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium cursor-pointer"
+                  >
+                    <option value="BR">BR</option>
+                    <option value="Latam">Latam</option>
+                    <option value="Inglês">Inglês</option>
+                    <option value="Francês">Francês</option>
+                    <option value="Italiano">Italiano</option>
+                  </select>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-6 pt-4 pl-1 col-span-1 md:col-span-2">
