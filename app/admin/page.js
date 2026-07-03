@@ -463,6 +463,7 @@ export default function Admin() {
                       onChange={(e) => setNovaSenha(e.target.value)}
                       placeholder="Defina a nova senha"
                       required
+                      autoComplete="new-password"
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition"
                     />
                     <button
