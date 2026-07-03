@@ -102,7 +102,7 @@ export default function Admin() {
   const handleResetarSenha = async (email) => {
     setMensagem({ type: '', text: '' });
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: getRedirectUrl('/perfil')
+      redirectTo: getRedirectUrl('/configuracoes')
     });
 
     if (error) {

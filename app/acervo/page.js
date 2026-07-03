@@ -56,6 +56,7 @@ export default function AcervoPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [acervoDetalhes, setAcervoDetalhes] = useState(null);
   const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     async function carregarHistoricoNomes() {
@@ -178,6 +179,10 @@ export default function AcervoPage() {
         .select('status_acesso')
         .eq('id', session.user.id)
         .single();
+
+      if (session.user.email === 'rafael.longo97@gmail.com') {
+        setIsAdmin(true);
+      }
 
       if (profile && profile.status_acesso === false) {
         alert('Seu acesso foi desativado pelo administrador.');
@@ -311,6 +316,14 @@ export default function AcervoPage() {
               <Link href="/acervo" className="text-sm font-semibold text-blue-600 transition">
                 Acervo de Drive
               </Link>
+              <Link href="/configuracoes" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
+                Configurações
+              </Link>
+              {isAdmin && (
+                <Link href="/admin" className="text-sm font-semibold text-red-600 hover:text-red-700 transition">
+                  Painel Admin
+                </Link>
+              )}
               <button 
                 onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
                 className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition cursor-pointer"
@@ -372,6 +385,22 @@ export default function AcervoPage() {
               >
                 Acervo de Drive
               </Link>
+              <Link 
+                href="/configuracoes" 
+                onClick={() => setMenuOpen(false)}
+                className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
+              >
+                Configurações
+              </Link>
+              {isAdmin && (
+                <Link 
+                  href="/admin" 
+                  onClick={() => setMenuOpen(false)}
+                  className="text-base font-semibold text-red-600 hover:text-red-700 transition"
+                >
+                  Painel Admin
+                </Link>
+              )}
               
               <hr className="border-gray-200 dark:border-gray-800" />
               
