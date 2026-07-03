@@ -75,14 +75,15 @@ export default function Login() {
       setErro('E-mail ou senha incorretos. Tente novamente.');
       setCarregando(false);
     } else {
-      // Verifica o status_acesso na tabela profiles
-      const { data: profile, error: profileErr } = await supabase
-        .from('profiles')
-        .select('status_acesso')
-        .eq('id', data.user.id)
-        .single();
+      // Verifica status de acesso através da API segura
+      const checkRes = await fetch('/api/auth/check-status', {
+        headers: {
+          'Authorization': `Bearer ${data.session?.access_token}`
+        }
+      });
+      const statusData = await checkRes.json();
 
-      if (profile && (profile.status_acesso === false || profile.status_acesso === 'inativo')) {
+      if (statusData && statusData.active === false) {
         setErro('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         setCarregando(false);

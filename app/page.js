@@ -79,16 +79,17 @@ export default function Home() {
         setIsAdmin(true);
       }
 
-      // Verifica status de acesso
-      const { data: profile, error: profileErr } = await supabase
-        .from('profiles')
-        .select('status_acesso')
-        .eq('id', session.user.id)
-        .single();
+      // Verifica status de acesso através da API segura
+      const res = await fetch('/api/auth/check-status', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
+      const statusData = await res.json();
 
-      console.log('Verificação de Acesso (Home):', { profile, profileErr });
+      console.log('Verificação de Acesso (Home):', statusData);
 
-      if (profileErr || !profile || profile.status_acesso === false || profile.status_acesso === 'inativo') {
+      if (statusData && statusData.active === false) {
         alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';

@@ -49,16 +49,17 @@ export default function Configuracoes() {
         return;
       }
 
-      // Verifica status de acesso
-      const { data: profile, error: profileErr } = await supabase
-        .from('profiles')
-        .select('status_acesso, nome, email')
-        .eq('id', session.user.id)
-        .single();
+      // Verifica status de acesso através da API segura
+      const res = await fetch('/api/auth/check-status', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
+      const statusData = await res.json();
 
-      console.log('Verificação de Acesso (Configurações):', { profile, profileErr });
+      console.log('Verificação de Acesso (Configurações):', statusData);
 
-      if (profileErr || !profile || profile.status_acesso === false || profile.status_acesso === 'inativo') {
+      if (statusData && statusData.active === false) {
         alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';
@@ -69,8 +70,8 @@ export default function Configuracoes() {
         setIsAdmin(true);
       }
 
-      const nomeUser = profile ? profile.nome : (session.user.user_metadata?.nome || '');
-      const emailUser = profile ? profile.email : session.user.email;
+      const nomeUser = statusData?.nome || (session.user.user_metadata?.nome || '');
+      const emailUser = statusData?.email || session.user.email;
 
       setUsuario({
         id: session.user.id,

@@ -173,20 +173,21 @@ export default function AcervoPage() {
         return;
       }
 
-      // Verifica status de acesso
-      const { data: profile, error: profileErr } = await supabase
-        .from('profiles')
-        .select('status_acesso')
-        .eq('id', session.user.id)
-        .single();
-
       if (session.user.email === 'rafael.longo97@gmail.com') {
         setIsAdmin(true);
       }
 
-      console.log('Verificação de Acesso (Acervo):', { profile, profileErr });
+      // Verifica status de acesso através da API segura
+      const res = await fetch('/api/auth/check-status', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
+      const statusData = await res.json();
 
-      if (profileErr || !profile || profile.status_acesso === false || profile.status_acesso === 'inativo') {
+      console.log('Verificação de Acesso (Acervo):', statusData);
+
+      if (statusData && statusData.active === false) {
         alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';
