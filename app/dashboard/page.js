@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
   const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
   const [filtroTempoAtivo, setFiltroTempoAtivo] = useState('Todas');
+  const [filtroTipoOferta, setFiltroTipoOferta] = useState('Todas');
 
   // Estados de ordenação
   const [sortField, setSortField] = useState('created_at'); // 'nome_produto', 'tempo_ativo', 'created_at'
@@ -123,7 +124,10 @@ export default function Dashboard() {
       }
     }
 
-    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo;
+    // 6. Filtro por Tipo de Oferta (DR ou 1X1)
+    const matchTipoOferta = filtroTipoOferta === 'Todas' || (oferta.tipo_oferta || 'DR') === filtroTipoOferta;
+
+    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta;
   });
 
   // Ordenação das ofertas filtradas
@@ -248,6 +252,20 @@ export default function Dashboard() {
 
     return (
       <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${classes}`}>
+        {val}
+      </span>
+    );
+  };
+
+  const renderTipoOfertaBadge = (tipo) => {
+    const val = tipo || 'DR';
+    let classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
+    if (val === '1X1') {
+      classes = 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
+    }
+
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${classes}`}>
         {val}
       </span>
     );
@@ -432,10 +450,23 @@ export default function Dashboard() {
                     <option value="90+">Acima de 90 dias</option>
                   </select>
                 </div>
+
+                {/* Filtro de Tipo de Oferta */}
+                <div className="w-full sm:w-40">
+                  <select
+                    value={filtroTipoOferta}
+                    onChange={(e) => setFiltroTipoOferta(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                  >
+                    <option value="Todas">Tipo: Todas</option>
+                    <option value="DR">DR</option>
+                    <option value="1X1">1X1</option>
+                  </select>
+                </div>
               </div>
 
               {/* Botão de Limpar Filtros */}
-              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas') && (
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas' || filtroTipoOferta !== 'Todas') && (
                 <button
                   onClick={() => {
                     setFiltroBusca('');
@@ -443,6 +474,7 @@ export default function Dashboard() {
                     setFiltroStatus('todos');
                     setSelectedFunilStatus('Todas');
                     setFiltroTempoAtivo('Todas');
+                    setFiltroTipoOferta('Todas');
                   }}
                   className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
                 >
@@ -483,6 +515,7 @@ export default function Dashboard() {
                 setFiltroStatus('todos');
                 setSelectedFunilStatus('Todas');
                 setFiltroTempoAtivo('Todas');
+                setFiltroTipoOferta('Todas');
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
             >
@@ -495,6 +528,7 @@ export default function Dashboard() {
               <table className="min-w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Tipo</th>
                     <th className="p-4 text-left">
                       <button 
                         type="button"
@@ -523,6 +557,10 @@ export default function Dashboard() {
                       onClick={() => setOfertaSelecionada(oferta)}
                       className="hover:bg-blue-50/40 cursor-pointer transition-all duration-200"
                     >
+                      {/* Tipo de Oferta */}
+                      <td className="p-4">
+                        {renderTipoOfertaBadge(oferta.tipo_oferta)}
+                      </td>
                       {/* Produto */}
                       <td className="p-4">
                         <div className="font-bold text-gray-900 flex items-center gap-2">
@@ -581,6 +619,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 mt-1">Detalhes completos do Swipe File</p>
               </div>
               <div className="flex items-center gap-3">
+                {renderTipoOfertaBadge(ofertaSelecionada.tipo_oferta)}
                 {ofertaSelecionada.status_ativo ? (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
