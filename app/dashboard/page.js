@@ -376,51 +376,33 @@ export default function Dashboard() {
 
         {/* Filtros Avançados */}
         {!carregando && ofertas.length > 0 && (
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Campo de Busca & Switch Escaladas */}
-            <div className="w-full md:flex-1 flex flex-col sm:flex-row gap-4 items-center">
-              <div className="w-full relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  🔍
-                </span>
-                <input
-                  type="text"
-                  value={filtroBusca}
-                  onChange={(e) => setFiltroBusca(e.target.value)}
-                  placeholder="Buscar por produto..."
-                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm"
-                />
-                {filtroBusca && (
-                  <button 
-                    onClick={() => setFiltroBusca('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
-                  >
-                    Limpar
-                  </button>
-                )}
-              </div>
-
-              {/* Switch Apenas Escaladas */}
-              <div className="w-full sm:w-auto flex items-center shrink-0">
-                <label className="relative flex items-center cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={apenasEscaladas} 
-                    onChange={(e) => setApenasEscaladas(e.target.checked)} 
-                    className="sr-only peer" 
-                  />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                  <span className="ml-2.5 text-xs font-bold text-gray-700 flex items-center gap-1">
-                    Apenas Escaladas <span className="animate-bounce">🚀</span>
-                  </span>
-                </label>
-              </div>
+          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-center justify-between">
+            {/* Campo de Busca Principal (Ocupa a maior parte no desktop, largura total no mobile) */}
+            <div className="w-full lg:flex-1 relative min-w-[280px]">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                🔍
+              </span>
+              <input
+                type="text"
+                value={filtroBusca}
+                onChange={(e) => setFiltroBusca(e.target.value)}
+                placeholder="Buscar por produto..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm"
+              />
+              {filtroBusca && (
+                <button 
+                  onClick={() => setFiltroBusca('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
 
-            {/* Dropdowns */}
-            <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+            {/* Grupo de Filtros Selects + Switch (Flex-wrap com gap uniforme) */}
+            <div className="w-full lg:w-auto flex flex-wrap gap-3 items-center justify-start lg:justify-end">
               {/* Filtro Nicho */}
-              <div className="w-full sm:w-48">
+              <div className="w-full sm:w-44">
                 <select
                   value={filtroNicho}
                   onChange={(e) => setFiltroNicho(e.target.value)}
@@ -433,63 +415,76 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              {/* Status, Funnel & Active Time Filters Container (stacked on mobile, side-by-side on desktop) */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                {/* Filtro Status */}
-                <div className="w-full sm:w-40">
-                  <select
-                    value={filtroStatus}
-                    onChange={(e) => setFiltroStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
-                  >
-                    <option value="todos">Status: Todos</option>
-                    <option value="ativos">Ativo</option>
-                    <option value="inativos">Inativo (Off)</option>
-                  </select>
-                </div>
+              {/* Filtro Status */}
+              <div className="w-full sm:w-36">
+                <select
+                  value={filtroStatus}
+                  onChange={(e) => setFiltroStatus(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="ativos">Ativo</option>
+                  <option value="inativos">Inativo (Off)</option>
+                </select>
+              </div>
 
-                {/* Filtro de Funil */}
-                <div className="w-full sm:w-44">
-                  <select
-                    value={selectedFunilStatus}
-                    onChange={(e) => setSelectedFunilStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
-                  >
-                    <option value="Todas">Funil: Todas</option>
-                    <option value="Em análise">Em análise</option>
-                    <option value="Para modelar">Para modelar</option>
-                    <option value="Já testei">Já testei</option>
-                    <option value="Descartado">Descartado</option>
-                  </select>
-                </div>
+              {/* Filtro de Funil */}
+              <div className="w-full sm:w-40">
+                <select
+                  value={selectedFunilStatus}
+                  onChange={(e) => setSelectedFunilStatus(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="Todas">Funil: Todas</option>
+                  <option value="Em análise">Em análise</option>
+                  <option value="Para modelar">Para modelar</option>
+                  <option value="Já testei">Já testei</option>
+                  <option value="Descartado">Descartado</option>
+                </select>
+              </div>
 
-                {/* Filtro de Tempo Ativo */}
-                <div className="w-full sm:w-48">
-                  <select
-                    value={filtroTempoAtivo}
-                    onChange={(e) => setFiltroTempoAtivo(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
-                  >
-                    <option value="Todas">Filtrar por Tempo Ativo</option>
-                    <option value="30">Até 30 dias</option>
-                    <option value="60">Até 60 dias</option>
-                    <option value="90">Até 90 dias</option>
-                    <option value="90+">Acima de 90 dias</option>
-                  </select>
-                </div>
+              {/* Filtro de Tempo Ativo */}
+              <div className="w-full sm:w-48">
+                <select
+                  value={filtroTempoAtivo}
+                  onChange={(e) => setFiltroTempoAtivo(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="Todas">Filtrar por Tempo Ativo</option>
+                  <option value="30">Até 30 dias</option>
+                  <option value="60">Até 60 dias</option>
+                  <option value="90">Até 90 dias</option>
+                  <option value="90+">Acima de 90 dias</option>
+                </select>
+              </div>
 
-                {/* Filtro de Tipo de Oferta */}
-                <div className="w-full sm:w-40">
-                  <select
-                    value={filtroTipoOferta}
-                    onChange={(e) => setFiltroTipoOferta(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
-                  >
-                    <option value="Todas">Tipo: Todas</option>
-                    <option value="DR">DR</option>
-                    <option value="1X1">1X1</option>
-                  </select>
-                </div>
+              {/* Filtro de Tipo de Oferta */}
+              <div className="w-full sm:w-36">
+                <select
+                  value={filtroTipoOferta}
+                  onChange={(e) => setFiltroTipoOferta(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                >
+                  <option value="Todas">Tipo: Todas</option>
+                  <option value="DR">DR</option>
+                  <option value="1X1">1X1</option>
+                </select>
+              </div>
+
+              {/* Switch Apenas Escaladas (Integrado organicamente) */}
+              <div className="w-full sm:w-auto flex items-center shrink-0 bg-gray-50 dark:bg-gray-800/40 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 h-[42px] shadow-sm">
+                <label className="relative flex items-center cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={apenasEscaladas} 
+                    onChange={(e) => setApenasEscaladas(e.target.checked)} 
+                    className="sr-only peer" 
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+                  <span className="ml-2.5 text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                    Apenas Escaladas <span className="animate-bounce">🚀</span>
+                  </span>
+                </label>
               </div>
 
               {/* Botão de Limpar Filtros */}
@@ -504,7 +499,7 @@ export default function Dashboard() {
                     setFiltroTipoOferta('Todas');
                     setApenasEscaladas(false);
                   }}
-                  className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
+                  className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm h-[42px]"
                 >
                   Limpar Filtros
                 </button>
@@ -584,11 +579,7 @@ export default function Dashboard() {
                     <tr 
                       key={oferta.id} 
                       onClick={() => setOfertaSelecionada(oferta)}
-                      className={`hover:bg-blue-50/40 cursor-pointer transition-all duration-200 ${
-                        oferta.esta_escalada 
-                          ? 'border-l-4 border-red-500 bg-red-50/10 dark:bg-red-950/5' 
-                          : ''
-                      }`}
+                      className="hover:bg-blue-50/40 cursor-pointer transition-all duration-200"
                     >
                       {/* Tipo de Oferta */}
                       <td className="p-4">
@@ -599,7 +590,7 @@ export default function Dashboard() {
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           <span className="text-base">📁</span> {oferta.nome_produto}
                           {oferta.esta_escalada && (
-                            <span className="text-sm animate-pulse" title="Oferta Escalada">🚀</span>
+                            <span className="ml-1.5 text-sm" title="Oferta Escalada">🚀</span>
                           )}
                         </div>
                         {oferta.tags && (
