@@ -683,19 +683,6 @@ export default function Home() {
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">2. Estrutura do Funil & Entrega</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tipo de Funil <span className="text-red-500">*</span></label>
-                  <select 
-                    name="tipo_funil" 
-                    value={formData.tipo_funil} 
-                    onChange={handleChange} 
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
-                  >
-                    <option value="DR">Direct Response (DR)</option>
-                    <option value="X1">Um a Um (X1)</option>
-                  </select>
-                </div>
-                <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Formato de Entrega <span className="text-red-500">*</span></label>
                   <select 
                     name="formato_entrega" 
