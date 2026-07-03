@@ -53,7 +53,7 @@ export default function Cadastro() {
       options: {
         emailRedirectTo: getRedirectUrl('/confirmacao-sucesso'),
         data: {
-          nome: nome.trim(),
+          nome: nome
         }
       }
     });
