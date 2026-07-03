@@ -54,7 +54,8 @@ export default function Home() {
     nomes_order_bumps: '', 
     formato_entrega: 'Vídeo',
     status_funil: 'Em análise',
-    tags: ''
+    tags: '',
+    notas_modelagem: ''
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -109,7 +110,8 @@ export default function Home() {
             nomes_order_bumps: data.nomes_order_bumps || '',
             formato_entrega: data.formato_entrega || 'Vídeo',
             status_funil: data.status_funil || 'Em análise',
-            tags: data.tags || ''
+            tags: data.tags || '',
+            notas_modelagem: data.notas_modelagem || ''
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -395,7 +397,8 @@ export default function Home() {
           nomes_order_bumps: '', 
           formato_entrega: 'Vídeo',
           status_funil: 'Em análise',
-          tags: ''
+          tags: '',
+          notas_modelagem: ''
         });
         setOrderBumps([]);
       }
@@ -767,6 +770,24 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {/* Section 5: Notas de Modelagem */}
+            <div className="pt-6 border-t border-gray-100">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">5. Notas de Modelagem</h3>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Notas de Modelagem</label>
+                  <textarea 
+                    name="notas_modelagem" 
+                    value={formData.notas_modelagem} 
+                    onChange={handleChange} 
+                    rows="5"
+                    placeholder="Escreva insights, observações e a estratégia por trás dessa oferta para modelagem futura..."
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium resize-y" 
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* Actions */}
             <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-4">

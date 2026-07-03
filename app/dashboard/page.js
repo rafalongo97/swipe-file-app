@@ -601,6 +601,18 @@ export default function Dashboard() {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Order Bumps</span>
                 {renderOrderBumpsModal()}
               </div>
+
+              {/* Notas de Modelagem Section */}
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Notas de Modelagem</span>
+                {ofertaSelecionada.notas_modelagem ? (
+                  <p className="text-sm text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">
+                    {ofertaSelecionada.notas_modelagem}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 italic">Nenhuma nota registrada para esta oferta.</p>
+                )}
+              </div>
             </div>
 
             {/* Footer with links */}
