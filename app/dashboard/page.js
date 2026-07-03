@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
   const [filtroTempoAtivo, setFiltroTempoAtivo] = useState('Todas');
   const [filtroTipoOferta, setFiltroTipoOferta] = useState('Todas');
+  const [apenasEscaladas, setApenasEscaladas] = useState(false);
 
   // Estados de ordenação
   const [sortField, setSortField] = useState('created_at'); // 'nome_produto', 'tempo_ativo', 'created_at'
@@ -131,7 +132,10 @@ export default function Dashboard() {
       matchTipoOferta = tipoMapeado === filtroTipoOferta;
     }
 
-    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta;
+    // 7. Filtro por Apenas Escaladas
+    const matchEscaladas = !apenasEscaladas || oferta.esta_escalada === true;
+
+    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta && matchEscaladas;
   });
 
   // Ordenação das ofertas filtradas
@@ -373,26 +377,44 @@ export default function Dashboard() {
         {/* Filtros Avançados */}
         {!carregando && ofertas.length > 0 && (
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Campo de Busca */}
-            <div className="w-full md:flex-1 relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                🔍
-              </span>
-              <input
-                type="text"
-                value={filtroBusca}
-                onChange={(e) => setFiltroBusca(e.target.value)}
-                placeholder="Buscar por produto..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm"
-              />
-              {filtroBusca && (
-                <button 
-                  onClick={() => setFiltroBusca('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
-                >
-                  Limpar
-                </button>
-              )}
+            {/* Campo de Busca & Switch Escaladas */}
+            <div className="w-full md:flex-1 flex flex-col sm:flex-row gap-4 items-center">
+              <div className="w-full relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  value={filtroBusca}
+                  onChange={(e) => setFiltroBusca(e.target.value)}
+                  placeholder="Buscar por produto..."
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm"
+                />
+                {filtroBusca && (
+                  <button 
+                    onClick={() => setFiltroBusca('')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+
+              {/* Switch Apenas Escaladas */}
+              <div className="w-full sm:w-auto flex items-center shrink-0">
+                <label className="relative flex items-center cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={apenasEscaladas} 
+                    onChange={(e) => setApenasEscaladas(e.target.checked)} 
+                    className="sr-only peer" 
+                  />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+                  <span className="ml-2.5 text-xs font-bold text-gray-700 flex items-center gap-1">
+                    Apenas Escaladas <span className="animate-bounce">🚀</span>
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Dropdowns */}
@@ -471,7 +493,7 @@ export default function Dashboard() {
               </div>
 
               {/* Botão de Limpar Filtros */}
-              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas' || filtroTipoOferta !== 'Todas') && (
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas' || filtroTipoOferta !== 'Todas' || apenasEscaladas) && (
                 <button
                   onClick={() => {
                     setFiltroBusca('');
@@ -480,6 +502,7 @@ export default function Dashboard() {
                     setSelectedFunilStatus('Todas');
                     setFiltroTempoAtivo('Todas');
                     setFiltroTipoOferta('Todas');
+                    setApenasEscaladas(false);
                   }}
                   className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
                 >
@@ -521,6 +544,7 @@ export default function Dashboard() {
                 setSelectedFunilStatus('Todas');
                 setFiltroTempoAtivo('Todas');
                 setFiltroTipoOferta('Todas');
+                setApenasEscaladas(false);
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
             >
@@ -560,7 +584,11 @@ export default function Dashboard() {
                     <tr 
                       key={oferta.id} 
                       onClick={() => setOfertaSelecionada(oferta)}
-                      className="hover:bg-blue-50/40 cursor-pointer transition-all duration-200"
+                      className={`hover:bg-blue-50/40 cursor-pointer transition-all duration-200 ${
+                        oferta.esta_escalada 
+                          ? 'border-l-4 border-red-500 bg-red-50/10 dark:bg-red-950/5' 
+                          : ''
+                      }`}
                     >
                       {/* Tipo de Oferta */}
                       <td className="p-4">
@@ -570,6 +598,9 @@ export default function Dashboard() {
                       <td className="p-4">
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           <span className="text-base">📁</span> {oferta.nome_produto}
+                          {oferta.esta_escalada && (
+                            <span className="text-sm animate-pulse" title="Oferta Escalada">🚀</span>
+                          )}
                         </div>
                         {oferta.tags && (
                           <div className="flex flex-wrap gap-1 mt-1 pl-7">

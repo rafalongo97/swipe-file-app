@@ -55,7 +55,8 @@ export default function Home() {
     formato_entrega: 'Vídeo',
     status_funil: 'Em análise',
     tags: '',
-    notas_modelagem: ''
+    notas_modelagem: '',
+    esta_escalada: false
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -111,7 +112,8 @@ export default function Home() {
             formato_entrega: data.formato_entrega || 'Vídeo',
             status_funil: data.status_funil || 'Em análise',
             tags: data.tags || '',
-            notas_modelagem: data.notas_modelagem || ''
+            notas_modelagem: data.notas_modelagem || '',
+            esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -398,7 +400,8 @@ export default function Home() {
           formato_entrega: 'Vídeo',
           status_funil: 'Em análise',
           tags: '',
-          notas_modelagem: ''
+          notas_modelagem: '',
+          esta_escalada: false
         });
         setOrderBumps([]);
       }
@@ -573,18 +576,36 @@ export default function Home() {
                   />
                 </div>
 
-                <div className="flex items-center h-full pt-8 pl-1">
-                  <label className="relative flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="status_ativo" 
-                      checked={formData.status_ativo} 
-                      onChange={handleChange} 
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span className="ml-3 text-sm font-semibold text-gray-900">Anúncio está Ativo?</span>
-                  </label>
+                <div className="flex flex-col sm:flex-row gap-6 pt-4 pl-1 col-span-1 md:col-span-2">
+                  <div className="flex items-center h-full">
+                    <label className="relative flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        name="status_ativo" 
+                        checked={formData.status_ativo} 
+                        onChange={handleChange} 
+                        className="sr-only peer" 
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <span className="ml-3 text-sm font-semibold text-gray-900">Anúncio está Ativo?</span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center h-full">
+                    <label className="relative flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        name="esta_escalada" 
+                        checked={formData.esta_escalada} 
+                        onChange={handleChange} 
+                        className="sr-only peer" 
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                      <span className="ml-3 text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                        Oferta Escalada <span className="animate-pulse">🚀</span>
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
