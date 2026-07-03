@@ -35,6 +35,10 @@ export default function Dashboard() {
   const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
   const [filtroTempoAtivo, setFiltroTempoAtivo] = useState('Todas');
 
+  // Estados de ordenação
+  const [sortField, setSortField] = useState('created_at'); // 'nome_produto', 'tempo_ativo', 'created_at'
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc', 'desc'
+
   // Estados de exclusão
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -121,6 +125,68 @@ export default function Dashboard() {
 
     return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo;
   });
+
+  // Ordenação das ofertas filtradas
+  const ofertasOrdenadas = [...ofertasFiltradas].sort((a, b) => {
+    if (sortField === 'nome_produto') {
+      const nomeA = a.nome_produto || '';
+      const nomeB = b.nome_produto || '';
+      return sortDirection === 'asc' 
+        ? nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' })
+        : nomeB.localeCompare(nomeA, 'pt-BR', { sensitivity: 'base' });
+    }
+    
+    if (sortField === 'tempo_ativo') {
+      const obterDias = (oferta) => {
+        if (!oferta.data_primeiro_anuncio) return -1;
+        const dataAnuncio = new Date(oferta.data_primeiro_anuncio);
+        const dataAtual = new Date();
+        dataAnuncio.setHours(0, 0, 0, 0);
+        dataAtual.setHours(0, 0, 0, 0);
+        const diferencaMs = dataAtual.getTime() - dataAnuncio.getTime();
+        return Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+      };
+
+      const diasA = obterDias(a);
+      const diasB = obterDias(b);
+
+      if (diasA === diasB) return 0;
+      if (diasA === -1) return 1;
+      if (diasB === -1) return -1;
+
+      return sortDirection === 'asc' ? diasA - diasB : diasB - diasA;
+    }
+
+    return 0; // Fallback: sem ordenação explícita
+  });
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const renderSortIcon = (field) => {
+    if (sortField !== field) {
+      return (
+        <span className="text-gray-300 dark:text-gray-600 ml-1 text-[10px] select-none">
+          ↕
+        </span>
+      );
+    }
+    return sortDirection === 'asc' ? (
+      <span className="text-blue-600 dark:text-blue-400 ml-1 text-[10px] select-none">
+        ▲
+      </span>
+    ) : (
+      <span className="text-blue-600 dark:text-blue-400 ml-1 text-[10px] select-none">
+        ▼
+      </span>
+    );
+  };
 
   const obterTempoAtivo = (dataPrimeiroAnuncio) => {
     if (!dataPrimeiroAnuncio) return 'Sem registro';
@@ -429,13 +495,29 @@ export default function Dashboard() {
               <table className="min-w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Nome da Oferta</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Status do Funil</th>
-                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs">Tempo Ativo</th>
+                    <th className="p-4 text-left">
+                      <button 
+                        type="button"
+                        onClick={() => handleSort('nome_produto')}
+                        className="flex items-center gap-1 font-bold text-gray-700 uppercase tracking-wider text-xs hover:text-blue-600 transition duration-200 cursor-pointer outline-none select-none animate-none"
+                      >
+                        Nome da Oferta {renderSortIcon('nome_produto')}
+                      </button>
+                    </th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Status do Funil</th>
+                    <th className="p-4 text-left">
+                      <button 
+                        type="button"
+                        onClick={() => handleSort('tempo_ativo')}
+                        className="flex items-center gap-1 font-bold text-gray-700 uppercase tracking-wider text-xs hover:text-blue-600 transition duration-200 cursor-pointer outline-none select-none animate-none"
+                      >
+                        Tempo Ativo {renderSortIcon('tempo_ativo')}
+                      </button>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {ofertasFiltradas.map((oferta) => (
+                  {ofertasOrdenadas.map((oferta) => (
                     <tr 
                       key={oferta.id} 
                       onClick={() => setOfertaSelecionada(oferta)}
