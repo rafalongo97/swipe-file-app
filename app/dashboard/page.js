@@ -124,8 +124,12 @@ export default function Dashboard() {
       }
     }
 
-    // 6. Filtro por Tipo de Oferta (DR ou 1X1)
-    const matchTipoOferta = filtroTipoOferta === 'Todas' || (oferta.tipo_oferta || 'DR') === filtroTipoOferta;
+    // 6. Filtro por Tipo de Oferta (mapeado de tipo_funil: 'DR' -> 'DR', 'X1' -> '1X1')
+    let matchTipoOferta = true;
+    if (filtroTipoOferta !== 'Todas') {
+      const tipoMapeado = oferta.tipo_funil === 'X1' ? '1X1' : (oferta.tipo_funil || 'DR');
+      matchTipoOferta = tipoMapeado === filtroTipoOferta;
+    }
 
     return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo && matchTipoOferta;
   });
@@ -257,8 +261,9 @@ export default function Dashboard() {
     );
   };
 
-  const renderTipoOfertaBadge = (tipo) => {
-    const val = tipo || 'DR';
+  const renderTipoOfertaBadge = (tipoFunil) => {
+    // Mapeia o tipo_funil ('DR' ou 'X1') para exibição ('DR' ou '1X1')
+    const val = tipoFunil === 'X1' ? '1X1' : (tipoFunil || 'DR');
     let classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
     if (val === '1X1') {
       classes = 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
@@ -559,7 +564,7 @@ export default function Dashboard() {
                     >
                       {/* Tipo de Oferta */}
                       <td className="p-4">
-                        {renderTipoOfertaBadge(oferta.tipo_oferta)}
+                        {renderTipoOfertaBadge(oferta.tipo_funil)}
                       </td>
                       {/* Produto */}
                       <td className="p-4">
@@ -619,7 +624,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 mt-1">Detalhes completos do Swipe File</p>
               </div>
               <div className="flex items-center gap-3">
-                {renderTipoOfertaBadge(ofertaSelecionada.tipo_oferta)}
+                {renderTipoOfertaBadge(ofertaSelecionada.tipo_funil)}
                 {ofertaSelecionada.status_ativo ? (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>

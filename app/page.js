@@ -55,8 +55,7 @@ export default function Home() {
     formato_entrega: 'Vídeo',
     status_funil: 'Em análise',
     tags: '',
-    notas_modelagem: '',
-    tipo_oferta: 'DR'
+    notas_modelagem: ''
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -112,8 +111,7 @@ export default function Home() {
             formato_entrega: data.formato_entrega || 'Vídeo',
             status_funil: data.status_funil || 'Em análise',
             tags: data.tags || '',
-            notas_modelagem: data.notas_modelagem || '',
-            tipo_oferta: data.tipo_oferta || 'DR'
+            notas_modelagem: data.notas_modelagem || ''
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -400,8 +398,7 @@ export default function Home() {
           formato_entrega: 'Vídeo',
           status_funil: 'Em análise',
           tags: '',
-          notas_modelagem: '',
-          tipo_oferta: 'DR'
+          notas_modelagem: ''
         });
         setOrderBumps([]);
       }
@@ -565,20 +562,6 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tipo de Oferta <span className="text-red-500">*</span></label>
-                  <select
-                    name="tipo_oferta"
-                    value={formData.tipo_oferta}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium cursor-pointer"
-                  >
-                    <option value="DR">DR</option>
-                    <option value="1X1">1X1</option>
-                  </select>
-                </div>
-
-                <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Data do Primeiro Anúncio <span className="text-red-500">*</span></label>
                   <input 
                     type="date" 
@@ -590,7 +573,7 @@ export default function Home() {
                   />
                 </div>
 
-                <div className="col-span-1 md:col-span-2 flex items-center h-full pt-2 pl-1">
+                <div className="flex items-center h-full pt-8 pl-1">
                   <label className="relative flex items-center cursor-pointer">
                     <input 
                       type="checkbox" 
