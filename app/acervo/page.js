@@ -53,6 +53,8 @@ export default function AcervoPage() {
   const [salvando, setSalvando] = useState(false);
   const [acervos, setAcervos] = useState([]);
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [acervoDetalhes, setAcervoDetalhes] = useState(null);
 
   const [formData, setFormData] = useState({
     nome_acervo: '',
@@ -78,6 +80,15 @@ export default function AcervoPage() {
     const matchNicho = filtroNicho === 'Todos' || acervo.nicho === filtroNicho;
     return matchBusca && matchNicho;
   });
+
+  const handleRowClick = (e, acervo) => {
+    if (e.target.closest('a') || e.target.closest('button')) {
+      return;
+    }
+    if (window.innerWidth < 768) {
+      setAcervoDetalhes(acervo);
+    }
+  };
 
   const abrirEdicao = (acervo) => {
     setAcervoEmEdicao(acervo);
@@ -229,7 +240,7 @@ export default function AcervoPage() {
               </span>
             </div>
             
-            <nav className="flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-6">
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -252,9 +263,86 @@ export default function AcervoPage() {
                 Sair
               </button>
             </nav>
+
+            {/* Hamburger Button (Mobile Only) */}
+            <div className="flex md:hidden items-center">
+              <button
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-750 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
+                aria-label="Abrir Menu"
+              >
+                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Drawer */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-40 md:hidden flex justify-end">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300"
+            onClick={() => setMenuOpen(false)}
+          ></div>
+          
+          {/* Drawer Panel */}
+          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 transition-all duration-300 z-50">
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">Menu</span>
+              <button 
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-500 hover:text-gray-750 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <nav className="flex flex-col gap-6 flex-1">
+              <Link 
+                href="/dashboard" 
+                onClick={() => setMenuOpen(false)}
+                className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
+              >
+                Dashboard
+              </Link>
+              <Link 
+                href="/acervo" 
+                onClick={() => setMenuOpen(false)}
+                className="text-base font-semibold text-blue-600 transition"
+              >
+                Acervo de Drive
+              </Link>
+              
+              <hr className="border-gray-200 dark:border-gray-800" />
+              
+              {/* Toggle theme inside mobile drawer */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Tema</span>
+                <button
+                  type="button"
+                  onClick={() => { toggleTheme(); }}
+                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
+                  aria-label="Alternar Tema"
+                >
+                  {isDark ? '☀️' : '🌙'}
+                </button>
+              </div>
+
+              <button 
+                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
+                className="w-full mt-auto bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-center text-sm"
+              >
+                Sair
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -419,16 +507,20 @@ export default function AcervoPage() {
                 <table className="min-w-full text-left text-sm whitespace-nowrap">
                   <thead className="bg-gray-50 dark:bg-gray-800/40 border-b border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300">
                     <tr>
-                      <th className="p-4 font-bold text-xs uppercase tracking-wider">Nicho</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-wider hidden md:table-cell">Nicho</th>
                       <th className="p-4 font-bold text-xs uppercase tracking-wider">Nome do Acervo</th>
-                      <th className="p-4 font-bold text-xs uppercase tracking-wider text-right">Ações</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-wider text-right hidden md:table-cell">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {acervosFiltrados.map((acervo) => (
-                      <tr key={acervo.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150">
+                      <tr 
+                        key={acervo.id} 
+                        onClick={(e) => handleRowClick(e, acervo)}
+                        className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150 cursor-pointer md:cursor-default"
+                      >
                         {/* Nicho Badge */}
-                        <td className="p-4">
+                        <td className="p-4 hidden md:table-cell">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border ${getNichoColorClass(acervo.nicho)}`}>
                             {acervo.nicho}
                           </span>
@@ -438,32 +530,34 @@ export default function AcervoPage() {
                           {acervo.nome_acervo}
                         </td>
                         {/* Ações */}
-                        <td className="p-4 text-right flex items-center justify-end gap-2">
-                          <a 
-                            href={acervo.url_drive}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>Abrir Link</span>
-                            <span>↗</span>
-                          </a>
-                          <button
-                            onClick={() => abrirEdicao(acervo)}
-                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer flex items-center gap-1"
-                            title="Editar Acervo"
-                          >
-                            <span>✏️</span>
-                            <span className="hidden sm:inline">Editar</span>
-                          </button>
-                          <button
-                            onClick={() => handleDelete(acervo.id)}
-                            className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold px-2 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer flex items-center gap-1"
-                            title="Excluir Acervo"
-                          >
-                            <span>🗑️</span>
-                            <span className="hidden sm:inline">Excluir</span>
-                          </button>
+                        <td className="p-4 text-right hidden md:table-cell">
+                          <div className="flex items-center justify-end gap-2">
+                            <a 
+                              href={acervo.url_drive}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>Abrir Link</span>
+                              <span>↗</span>
+                            </a>
+                            <button
+                              onClick={() => abrirEdicao(acervo)}
+                              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer flex items-center gap-1"
+                              title="Editar Acervo"
+                            >
+                              <span>✏️</span>
+                              <span className="hidden sm:inline">Editar</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(acervo.id)}
+                              className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold px-2 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer flex items-center gap-1"
+                              title="Excluir Acervo"
+                            >
+                              <span>🗑️</span>
+                              <span className="hidden sm:inline">Excluir</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -550,6 +644,104 @@ export default function AcervoPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Detalhes (Mobile Only) */}
+      {acervoDetalhes && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 md:hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-md w-full overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/30">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base">Detalhes do Acervo</h3>
+              <button 
+                onClick={() => setAcervoDetalhes(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-semibold transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Nicho */}
+              <div>
+                <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">Nicho</span>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold border ${getNichoColorClass(acervoDetalhes.nicho)}`}>
+                  {acervoDetalhes.nicho}
+                </span>
+              </div>
+
+              {/* Nome */}
+              <div>
+                <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Nome do Acervo</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white break-words">{acervoDetalhes.nome_acervo}</span>
+              </div>
+
+              {/* URL */}
+              <div>
+                <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">URL do Google Drive</span>
+                <a 
+                  href={acervoDetalhes.url_drive}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all block"
+                >
+                  {acervoDetalhes.url_drive}
+                </a>
+              </div>
+
+              {/* Data de Cadastro */}
+              {acervoDetalhes.created_at && (
+                <div>
+                  <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Cadastrado em</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {new Date(acervoDetalhes.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* Actions Grid */}
+              <div className="grid grid-cols-1 gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <a 
+                  href={acervoDetalhes.url_drive}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-sm text-sm text-center flex items-center justify-center gap-2 cursor-pointer h-[46px]"
+                >
+                  <span>Abrir Link no Google Drive</span>
+                  <span>↗</span>
+                </a>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      const item = acervoDetalhes;
+                      setAcervoDetalhes(null);
+                      abrirEdicao(item);
+                    }}
+                    className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold py-3 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer flex items-center justify-center gap-2 text-sm h-[46px]"
+                  >
+                    <span>✏️ Editar</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const id = acervoDetalhes.id;
+                      setAcervoDetalhes(null);
+                      handleDelete(id);
+                    }}
+                    className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-3 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer flex items-center justify-center gap-2 text-sm h-[46px]"
+                  >
+                    <span>🗑️ Excluir</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
