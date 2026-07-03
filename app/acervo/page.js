@@ -46,6 +46,16 @@ export default function AcervoPage() {
     nicho: 'Ganhar Dinheiro'
   });
 
+  const [filtroBusca, setFiltroBusca] = useState('');
+  const [filtroNicho, setFiltroNicho] = useState('Todos');
+
+  // Filtragem local combinada dos acervos
+  const acervosFiltrados = acervos.filter((acervo) => {
+    const matchBusca = acervo.nome_acervo ? acervo.nome_acervo.toLowerCase().includes(filtroBusca.toLowerCase()) : true;
+    const matchNicho = filtroNicho === 'Todos' || acervo.nicho === filtroNicho;
+    return matchBusca && matchNicho;
+  });
+
   // Verifica acesso e carrega dados
   useEffect(() => {
     async function verificarAcessoAndLoad() {
@@ -277,6 +287,47 @@ export default function AcervoPage() {
               <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold">{acervos.length} cadastrados</span>
             </div>
 
+            {/* Filtros da Listagem */}
+            {!carregandoDados && acervos.length > 0 && (
+              <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800/20 border-b border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row gap-3 items-center">
+                {/* Busca por Nome */}
+                <div className="w-full sm:flex-1 relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                    🔍
+                  </span>
+                  <input
+                    type="text"
+                    value={filtroBusca}
+                    onChange={(e) => setFiltroBusca(e.target.value)}
+                    placeholder="Buscar acervo por nome..."
+                    className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-xs font-medium transition shadow-xs"
+                  />
+                  {filtroBusca && (
+                    <button 
+                      onClick={() => setFiltroBusca('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xs font-bold"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtro por Nicho */}
+                <div className="w-full sm:w-48">
+                  <select
+                    value={filtroNicho}
+                    onChange={(e) => setFiltroNicho(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-xs font-medium transition shadow-xs cursor-pointer"
+                  >
+                    <option value="Todos">Filtrar por Nicho</option>
+                    {NICHOS_LIST.map(nicho => (
+                      <option key={nicho} value={nicho}>{nicho}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="flex-1 overflow-x-auto">
               {carregandoDados ? (
                 <div className="p-12 text-center flex flex-col justify-center items-center">
@@ -289,6 +340,21 @@ export default function AcervoPage() {
                   <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Nenhum acervo de drive cadastrado</h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Use o formulário ao lado para registrar o seu primeiro acervo de arquivos compartilhado do Google Drive.</p>
                 </div>
+              ) : acervosFiltrados.length === 0 ? (
+                <div className="p-12 text-center max-w-md mx-auto flex flex-col items-center">
+                  <span className="text-3xl mb-3 block">🔍</span>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Nenhum acervo encontrado</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Nenhum acervo encontrado com esses critérios. Tente mudar o texto de busca ou selecionar outro filtro.</p>
+                  <button
+                    onClick={() => {
+                      setFiltroBusca('');
+                      setFiltroNicho('Todos');
+                    }}
+                    className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-xs transition cursor-pointer"
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
               ) : (
                 <table className="min-w-full text-left text-sm whitespace-nowrap">
                   <thead className="bg-gray-50 dark:bg-gray-800/40 border-b border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300">
@@ -299,7 +365,7 @@ export default function AcervoPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {acervos.map((acervo) => (
+                    {acervosFiltrados.map((acervo) => (
                       <tr key={acervo.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150">
                         {/* Nicho Badge */}
                         <td className="p-4">
