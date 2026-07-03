@@ -82,8 +82,8 @@ export default function Login() {
         .eq('id', data.user.id)
         .single();
 
-      if (profile && profile.status_acesso === false) {
-        setErro('Seu acesso foi desativado pelo administrador.');
+      if (profile && (profile.status_acesso === false || profile.status_acesso === 'inativo')) {
+        setErro('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         setCarregando(false);
       } else {
