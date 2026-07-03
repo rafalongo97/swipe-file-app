@@ -55,6 +55,42 @@ export default function AcervoPage() {
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
   const [menuOpen, setMenuOpen] = useState(false);
   const [acervoDetalhes, setAcervoDetalhes] = useState(null);
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+
+  useEffect(() => {
+    async function carregarHistoricoNomes() {
+      if (!acervoDetalhes) return;
+      setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+      const createdBy = acervoDetalhes.created_by;
+      const updatedBy = acervoDetalhes.updated_by;
+      
+      const ids = [];
+      if (createdBy) ids.push(createdBy);
+      if (updatedBy && !ids.includes(updatedBy)) ids.push(updatedBy);
+      
+      if (ids.length === 0) {
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome')
+        .in('id', ids);
+        
+      if (!error && data) {
+        const map = {};
+        data.forEach(p => { map[p.id] = p.nome; });
+        setHistoricoNomes({
+          criadoPor: map[createdBy] || 'Desconhecido',
+          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido'
+        });
+      } else {
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+      }
+    }
+    carregarHistoricoNomes();
+  }, [acervoDetalhes]);
 
   const [formData, setFormData] = useState({
     nome_acervo: '',
@@ -106,12 +142,14 @@ export default function AcervoPage() {
       return;
     }
     setSalvandoEdicao(true);
+    const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase
       .from('acervos_drive')
       .update({
         nome_acervo: formDataEdicao.nome_acervo.trim(),
         url_drive: formDataEdicao.url_drive.trim(),
-        nicho: formDataEdicao.nicho
+        nicho: formDataEdicao.nicho,
+        updated_by: user ? user.id : null
       })
       .eq('id', acervoEmEdicao.id);
 
@@ -133,6 +171,21 @@ export default function AcervoPage() {
         window.location.href = '/login';
         return;
       }
+
+      // Verifica status de acesso
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status_acesso')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && profile.status_acesso === false) {
+        alert('Seu acesso foi desativado pelo administrador.');
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+        return;
+      }
+
       setCarregandoAuth(false);
       await carregarAcervos();
     }
@@ -176,7 +229,9 @@ export default function AcervoPage() {
       nome_acervo: formData.nome_acervo.trim(),
       url_drive: formData.url_drive.trim(),
       nicho: formData.nicho,
-      user_id: user ? user.id : null
+      user_id: user ? user.id : null,
+      created_by: user ? user.id : null,
+      updated_by: user ? user.id : null
     };
 
     const { error } = await supabase
@@ -705,6 +760,14 @@ export default function AcervoPage() {
                   </span>
                 </div>
               )}
+
+              {/* Histórico de Edição */}
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-3">
+                <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Histórico</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span> | Editado por: <span className="font-semibold">{historicoNomes.editadoPor}</span>
+                </span>
+              </div>
 
               {/* Actions Grid */}
               <div className="grid grid-cols-1 gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">

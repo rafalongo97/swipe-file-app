@@ -73,6 +73,20 @@ export default function Home() {
         window.location.href = '/login'; // Expulsa para o login se não tiver sessão
         return;
       }
+
+      // Verifica status de acesso
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status_acesso')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && profile.status_acesso === false) {
+        alert('Seu acesso foi desativado pelo administrador.');
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+        return;
+      }
       
       setCarregandoAuth(false);
 
@@ -359,13 +373,20 @@ export default function Home() {
     // Remove campos legados/inexistentes da tabela atual
     const { valor_upsell_maior, valor_desconto, valor_principal, valor_upsell, link_checkout_upsell, ...cleanFormData } = formData;
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     const payload = {
       ...cleanFormData,
       tipo_funil: tipoFunilCalculado,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
-      nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : ''
+      nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : '',
+      updated_by: user ? user.id : null
     };
+
+    if (!editId) {
+      payload.created_by = user ? user.id : null;
+    }
 
     console.log("Enviando para Supabase (payload sanitizado):", payload);
 

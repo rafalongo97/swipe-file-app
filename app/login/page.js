@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 
 export default function Login() {
@@ -42,8 +43,21 @@ export default function Login() {
       setErro('E-mail ou senha incorretos. Tente novamente.');
       setCarregando(false);
     } else {
-      // Se der certo, redireciona o usuário para o Dashboard
-      window.location.href = '/dashboard';
+      // Verifica o status_acesso na tabela profiles
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('status_acesso')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profile && profile.status_acesso === false) {
+        setErro('Seu acesso foi desativado pelo administrador.');
+        await supabase.auth.signOut();
+        setCarregando(false);
+      } else {
+        // Se der certo, redireciona o usuário para o Dashboard
+        window.location.href = '/dashboard';
+      }
     }
   };
 
@@ -109,6 +123,15 @@ export default function Login() {
             {carregando ? 'Entrando...' : 'Entrar no Swipe'}
           </button>
         </form>
+
+        <div className="mt-8 text-center border-t border-gray-100 dark:border-zinc-800 pt-6">
+          <p className="text-sm text-gray-500 dark:text-zinc-400">
+            Não tem uma conta?{' '}
+            <Link href="/cadastro" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">
+              Cadastre-se
+            </Link>
+          </p>
+        </div>
         
       </div>
     </div>

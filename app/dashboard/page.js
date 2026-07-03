@@ -31,6 +31,42 @@ export default function Dashboard() {
 
   // Estados dos filtros
   const [filtroBusca, setFiltroBusca] = useState('');
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+
+  useEffect(() => {
+    async function carregarHistoricoNomes() {
+      if (!ofertaSelecionada) return;
+      setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+      const createdBy = ofertaSelecionada.created_by;
+      const updatedBy = ofertaSelecionada.updated_by;
+      
+      const ids = [];
+      if (createdBy) ids.push(createdBy);
+      if (updatedBy && !ids.includes(updatedBy)) ids.push(updatedBy);
+      
+      if (ids.length === 0) {
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nome')
+        .in('id', ids);
+        
+      if (!error && data) {
+        const map = {};
+        data.forEach(p => { map[p.id] = p.nome; });
+        setHistoricoNomes({
+          criadoPor: map[createdBy] || 'Desconhecido',
+          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido'
+        });
+      } else {
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+      }
+    }
+    carregarHistoricoNomes();
+  }, [ofertaSelecionada]);
   const [filtroNicho, setFiltroNicho] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
   const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
@@ -56,6 +92,20 @@ export default function Dashboard() {
       if (!session) {
         window.location.href = '/login';
         return; // Para a execução se não estiver logado
+      }
+
+      // Verifica status de acesso
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status_acesso')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && profile.status_acesso === false) {
+        alert('Seu acesso foi desativado pelo administrador.');
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+        return;
       }
 
       // Se passou pelo cadeado, busca as ofertas
@@ -892,6 +942,14 @@ export default function Dashboard() {
                 ) : (
                   <p className="text-xs text-gray-500 italic">Nenhuma nota registrada para esta oferta.</p>
                 )}
+              </div>
+
+              {/* Histórico de Edição */}
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
+                <p className="text-xs text-gray-500">
+                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span> | Editado por: <span className="font-semibold">{historicoNomes.editadoPor}</span>
+                </p>
               </div>
             </div>
 
