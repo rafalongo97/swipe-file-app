@@ -49,12 +49,56 @@ export default function AcervoPage() {
   const [filtroBusca, setFiltroBusca] = useState('');
   const [filtroNicho, setFiltroNicho] = useState('Todos');
 
+  // Estados de edição de acervo
+  const [acervoEmEdicao, setAcervoEmEdicao] = useState(null);
+  const [formDataEdicao, setFormDataEdicao] = useState({
+    nome_acervo: '',
+    url_drive: '',
+    nicho: ''
+  });
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+
   // Filtragem local combinada dos acervos
   const acervosFiltrados = acervos.filter((acervo) => {
     const matchBusca = acervo.nome_acervo ? acervo.nome_acervo.toLowerCase().includes(filtroBusca.toLowerCase()) : true;
     const matchNicho = filtroNicho === 'Todos' || acervo.nicho === filtroNicho;
     return matchBusca && matchNicho;
   });
+
+  const abrirEdicao = (acervo) => {
+    setAcervoEmEdicao(acervo);
+    setFormDataEdicao({
+      nome_acervo: acervo.nome_acervo,
+      url_drive: acervo.url_drive,
+      nicho: acervo.nicho
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (!formDataEdicao.nome_acervo.trim() || !formDataEdicao.url_drive.trim()) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    setSalvandoEdicao(true);
+    const { error } = await supabase
+      .from('acervos_drive')
+      .update({
+        nome_acervo: formDataEdicao.nome_acervo.trim(),
+        url_drive: formDataEdicao.url_drive.trim(),
+        nicho: formDataEdicao.nicho
+      })
+      .eq('id', acervoEmEdicao.id);
+
+    if (error) {
+      console.error('Erro ao atualizar acervo:', error);
+      alert('Erro ao salvar alterações: ' + error.message);
+    } else {
+      setAcervoEmEdicao(null);
+      await carregarAcervos();
+    }
+    setSalvandoEdicao(false);
+  };
 
   // Verifica acesso e carrega dados
   useEffect(() => {
@@ -389,11 +433,20 @@ export default function AcervoPage() {
                             <span>↗</span>
                           </a>
                           <button
+                            onClick={() => abrirEdicao(acervo)}
+                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 transition cursor-pointer flex items-center gap-1"
+                            title="Editar Acervo"
+                          >
+                            <span>✏️</span>
+                            <span className="hidden sm:inline">Editar</span>
+                          </button>
+                          <button
                             onClick={() => handleDelete(acervo.id)}
-                            className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold px-2 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer"
+                            className="bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs font-bold px-2 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer flex items-center gap-1"
                             title="Excluir Acervo"
                           >
-                            Excluir
+                            <span>🗑️</span>
+                            <span className="hidden sm:inline">Excluir</span>
                           </button>
                         </td>
                       </tr>
@@ -406,6 +459,85 @@ export default function AcervoPage() {
         </div>
 
       </main>
+
+      {/* Modal de Edição */}
+      {acervoEmEdicao && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-md w-full overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-250 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/30">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base">Editar Acervo</h3>
+              <button 
+                onClick={() => setAcervoEmEdicao(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-semibold transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleUpdate} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Nome do Acervo <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" 
+                  value={formDataEdicao.nome_acervo}
+                  onChange={(e) => setFormDataEdicao(prev => ({ ...prev, nome_acervo: e.target.value }))}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-905 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">URL do Drive <span className="text-red-500">*</span></label>
+                <input 
+                  type="url" 
+                  value={formDataEdicao.url_drive}
+                  onChange={(e) => setFormDataEdicao(prev => ({ ...prev, url_drive: e.target.value }))}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-905 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Nicho <span className="text-red-500">*</span></label>
+                <select 
+                  value={formDataEdicao.nicho}
+                  onChange={(e) => setFormDataEdicao(prev => ({ ...prev, nicho: e.target.value }))}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition cursor-pointer"
+                >
+                  {NICHOS_LIST.map(nicho => (
+                    <option key={nicho} value={nicho}>{nicho}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => setAcervoEmEdicao(null)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-bold transition text-sm cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvandoEdicao}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition duration-200 cursor-pointer disabled:opacity-50 text-sm flex items-center gap-2"
+                >
+                  {salvandoEdicao ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>Salvando...</span>
+                    </>
+                  ) : (
+                    <span>Salvar Alterações</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
