@@ -96,7 +96,7 @@ export default function Dashboard() {
       }
 
       // Verifica status de acesso
-      const { data: profile } = await supabase
+      const { data: profile, error: profileErr } = await supabase
         .from('profiles')
         .select('status_acesso')
         .eq('id', session.user.id)
@@ -106,7 +106,9 @@ export default function Dashboard() {
         setIsAdmin(true);
       }
 
-      if (profile && (profile.status_acesso === false || profile.status_acesso === 'inativo')) {
+      console.log('Verificação de Acesso (Dashboard):', { profile, profileErr });
+
+      if (profileErr || !profile || profile.status_acesso === false || profile.status_acesso === 'inativo') {
         alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';

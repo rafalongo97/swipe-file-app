@@ -50,13 +50,15 @@ export default function Configuracoes() {
       }
 
       // Verifica status de acesso
-      const { data: profile } = await supabase
+      const { data: profile, error: profileErr } = await supabase
         .from('profiles')
         .select('status_acesso, nome, email')
         .eq('id', session.user.id)
         .single();
 
-      if (profile && (profile.status_acesso === false || profile.status_acesso === 'inativo')) {
+      console.log('Verificação de Acesso (Configurações):', { profile, profileErr });
+
+      if (profileErr || !profile || profile.status_acesso === false || profile.status_acesso === 'inativo') {
         alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';
