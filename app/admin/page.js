@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import { supabase, getRedirectUrl } from '../../lib/supabase';
 
 export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -102,7 +102,7 @@ export default function Admin() {
   const handleResetarSenha = async (email) => {
     setMensagem({ type: '', text: '' });
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/perfil`
+      redirectTo: getRedirectUrl('/perfil')
     });
 
     if (error) {

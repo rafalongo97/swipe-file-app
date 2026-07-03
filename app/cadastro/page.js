@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import { supabase, getRedirectUrl } from '../../lib/supabase';
 
 export default function Cadastro() {
   const [nome, setNome] = useState('');
@@ -51,7 +51,7 @@ export default function Cadastro() {
       email: email.trim(),
       password: senha,
       options: {
-        emailRedirectTo: `${window.location.origin}/login`,
+        emailRedirectTo: getRedirectUrl('/confirmacao-sucesso'),
         data: {
           nome: nome.trim(),
         }
