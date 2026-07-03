@@ -125,11 +125,16 @@ export default function Dashboard() {
       }
     }
 
-    // 6. Filtro por Tipo de Oferta (mapeado de tipo_funil: 'DR' -> 'DR', 'X1' -> '1X1')
+    // 6. Filtro por Tipo de Oferta (com suporte a array e fallback para tipo_funil)
     let matchTipoOferta = true;
     if (filtroTipoOferta !== 'Todas') {
-      const tipoMapeado = oferta.tipo_funil === 'X1' ? '1X1' : (oferta.tipo_funil || 'DR');
-      matchTipoOferta = tipoMapeado === filtroTipoOferta;
+      let tiposOferta = [];
+      if (oferta.tipo_oferta && Array.isArray(oferta.tipo_oferta) && oferta.tipo_oferta.length > 0) {
+        tiposOferta = oferta.tipo_oferta;
+      } else {
+        tiposOferta = oferta.tipo_funil === 'X1' ? ['1X1'] : ['DR'];
+      }
+      matchTipoOferta = tiposOferta.includes(filtroTipoOferta);
     }
 
     // 7. Filtro por Apenas Escaladas
@@ -265,18 +270,29 @@ export default function Dashboard() {
     );
   };
 
-  const renderTipoOfertaBadge = (tipoFunil) => {
-    // Mapeia o tipo_funil ('DR' ou 'X1') para exibição ('DR' ou '1X1')
-    const val = tipoFunil === 'X1' ? '1X1' : (tipoFunil || 'DR');
-    let classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
-    if (val === '1X1') {
-      classes = 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
+  const renderTipoOfertaBadges = (oferta) => {
+    // Tenta obter o array tipo_oferta. Se for nulo/vazio, faz o fallback para tipo_funil
+    let tipos = [];
+    if (oferta.tipo_oferta && Array.isArray(oferta.tipo_oferta) && oferta.tipo_oferta.length > 0) {
+      tipos = oferta.tipo_oferta;
+    } else {
+      tipos = oferta.tipo_funil === 'X1' ? ['1X1'] : ['DR'];
     }
 
     return (
-      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${classes}`}>
-        {val}
-      </span>
+      <div className="flex flex-wrap gap-1.5 items-center">
+        {tipos.map((tipo) => {
+          let classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
+          if (tipo === '1X1') {
+            classes = 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
+          }
+          return (
+            <span key={tipo} className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${classes}`}>
+              {tipo}
+            </span>
+          );
+        })}
+      </div>
     );
   };
 
@@ -583,7 +599,7 @@ export default function Dashboard() {
                     >
                       {/* Tipo de Oferta */}
                       <td className="p-4">
-                        {renderTipoOfertaBadge(oferta.tipo_funil)}
+                        {renderTipoOfertaBadges(oferta)}
                       </td>
                       {/* Produto */}
                       <td className="p-4">
@@ -646,7 +662,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 mt-1">Detalhes completos do Swipe File</p>
               </div>
               <div className="flex items-center gap-3">
-                {renderTipoOfertaBadge(ofertaSelecionada.tipo_funil)}
+                {renderTipoOfertaBadges(ofertaSelecionada)}
                 {ofertaSelecionada.status_ativo ? (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>

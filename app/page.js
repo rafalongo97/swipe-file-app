@@ -56,7 +56,8 @@ export default function Home() {
     status_funil: 'Em análise',
     tags: '',
     notas_modelagem: '',
-    esta_escalada: false
+    esta_escalada: false,
+    tipo_oferta: ['DR']
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -95,6 +96,13 @@ export default function Home() {
             text: 'Não foi possível carregar a oferta para edição.' 
           });
         } else if (data) {
+          let arrayTipoOferta = ['DR'];
+          if (data.tipo_oferta && Array.isArray(data.tipo_oferta) && data.tipo_oferta.length > 0) {
+            arrayTipoOferta = data.tipo_oferta;
+          } else if (data.tipo_funil) {
+            arrayTipoOferta = data.tipo_funil === 'X1' ? ['1X1'] : ['DR'];
+          }
+
           // Preenche os campos do formulário (convertendo valores numéricos ou nulos para string controlada)
           setFormData({
             nome_produto: data.nome_produto || '',
@@ -113,7 +121,8 @@ export default function Home() {
             status_funil: data.status_funil || 'Em análise',
             tags: data.tags || '',
             notas_modelagem: data.notas_modelagem || '',
-            esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false
+            esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false,
+            tipo_oferta: arrayTipoOferta
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -330,11 +339,26 @@ export default function Home() {
       valor: sanitizeNumber(bump.valor)
     }));
 
+    // Valida se selecionou pelo menos um tipo de oferta
+    if (!formData.tipo_oferta || formData.tipo_oferta.length === 0) {
+      const msg = 'Selecione pelo menos um Tipo de Oferta (DR ou 1X1).';
+      setMensagem({ type: 'error', text: msg });
+      alert(msg);
+      setSalvando(false);
+      return;
+    }
+
+    // Mapeia tipo_funil a partir de tipo_oferta para compatibilidade
+    const tipoFunilCalculado = formData.tipo_oferta.includes('X1') || formData.tipo_oferta.includes('1X1')
+      ? 'X1'
+      : 'DR';
+
     // Remove campos legados/inexistentes da tabela atual
     const { valor_upsell_maior, valor_desconto, valor_principal, valor_upsell, link_checkout_upsell, ...cleanFormData } = formData;
 
     const payload = {
       ...cleanFormData,
+      tipo_funil: tipoFunilCalculado,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
       nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : ''
@@ -401,7 +425,8 @@ export default function Home() {
           status_funil: 'Em análise',
           tags: '',
           notas_modelagem: '',
-          esta_escalada: false
+          esta_escalada: false,
+          tipo_oferta: ['DR']
         });
         setOrderBumps([]);
       }
@@ -574,6 +599,49 @@ export default function Home() {
                     required
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Tipo de Oferta <span className="text-red-500">*</span></label>
+                  <div className="flex gap-6 items-center bg-gray-50 dark:bg-gray-800/40 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 h-[48px] shadow-sm">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-200 cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        name="tipo_oferta" 
+                        value="DR"
+                        checked={formData.tipo_oferta ? formData.tipo_oferta.includes('DR') : false}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData(prev => {
+                            const atual = prev.tipo_oferta || [];
+                            const nova = checked ? [...atual, 'DR'] : atual.filter(v => v !== 'DR');
+                            return { ...prev, tipo_oferta: nova };
+                          });
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 cursor-pointer"
+                      />
+                      DR
+                    </label>
+
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-200 cursor-pointer select-none">
+                      <input 
+                        type="checkbox" 
+                        name="tipo_oferta" 
+                        value="1X1"
+                        checked={formData.tipo_oferta ? formData.tipo_oferta.includes('1X1') : false}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData(prev => {
+                            const atual = prev.tipo_oferta || [];
+                            const nova = checked ? [...atual, '1X1'] : atual.filter(v => v !== '1X1');
+                            return { ...prev, tipo_oferta: nova };
+                          });
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4 cursor-pointer"
+                      />
+                      1X1
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-6 pt-4 pl-1 col-span-1 md:col-span-2">
