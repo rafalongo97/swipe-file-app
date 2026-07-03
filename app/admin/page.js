@@ -78,15 +78,28 @@ export default function Admin() {
 
   const handleToggleAcesso = async (profileId, statusAcessoAtual) => {
     setMensagem({ type: '', text: '' });
-    const { error } = await supabase
-      .from('profiles')
-      .update({ status_acesso: !statusAcessoAtual })
-      .eq('id', profileId);
+    try {
+      const novoStatus = !statusAcessoAtual;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status_acesso: novoStatus })
+        .eq('id', profileId);
 
-    if (error) {
-      alert('Erro ao alterar status de acesso: ' + error.message);
-    } else {
-      await carregarProfiles();
+      if (error) {
+        console.error('Erro retornado pelo Supabase no bloqueio:', error);
+        alert('Erro ao alterar status de acesso: ' + error.message);
+        return;
+      }
+
+      // Atualiza o estado local de perfis para atualizar a tabela instantaneamente
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status_acesso: novoStatus } : p));
+      
+      // Atualiza o estado local do usuário selecionado para atualizar o modal instantaneamente
+      setUsuarioSelecionado(prev => prev && prev.id === profileId ? { ...prev, status_acesso: novoStatus } : prev);
+      
+    } catch (err) {
+      console.error('Erro capturado no try/catch da função de bloqueio:', err);
+      alert('Erro inesperado ao alterar acesso. Verifique o console.');
     }
   };
 
@@ -435,13 +448,7 @@ export default function Admin() {
               <div>
                 <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Controle de Acesso</h4>
                 <button
-                  onClick={async () => {
-                    await handleToggleAcesso(usuarioSelecionado.id, usuarioSelecionado.status_acesso !== false);
-                    setUsuarioSelecionado({
-                      ...usuarioSelecionado,
-                      status_acesso: !usuarioSelecionado.status_acesso
-                    });
-                  }}
+                  onClick={() => handleToggleAcesso(usuarioSelecionado.id, usuarioSelecionado.status_acesso !== false)}
                   className={`w-full text-sm font-bold py-2.5 px-4 rounded-lg border transition cursor-pointer flex justify-center items-center gap-1.5 ${
                     usuarioSelecionado.status_acesso !== false
                       ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-400'
