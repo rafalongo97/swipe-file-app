@@ -9,7 +9,7 @@ const NICHOS_CONFIG = {
   'Saúde & Bem-estar': ['Emagrecimento', 'Fitness / Musculação', 'Dietas / Nutrição', 'Saúde Mental', 'Suplementos'],
   'Relacionamentos': ['Sedução / Conquista', 'Casamento / Família', 'Amizades / Networking'],
   'Desenvolvimento Pessoal': ['Produtividade', 'Autoajuda', 'Oratória / Inteligência Emocional', 'Espiritualidade'],
-  'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI', 'Profissões Industriais (Metalúrgica, Elétrica, Solda, etc.)'],
+  'Hobbies & Profissões': ['Culinária / Gastronomia', 'Idiomas / Inglês', 'Música / Instrumentos', 'Estética / Beleza', 'Programação / TI', 'Profissões Industriais (Metalúrgica, Elétrica, Solda, etc.)', 'Segurança e Capacitação Técnica'],
   'Religioso': ['Devocionais / Estudos Bíblicos', 'Teologia', 'Orações & Mensagens', 'Família & Relacionamento Cristão', 'Música / Ministério de Louvor', 'Mentalidade / Fé'],
   'Educação e Desenvolvimento': ['Atividades Pedagógicas', 'Educação Inclusiva (Autismo)', 'Treinamento Esportivo', 'Material Didático']
 }; // Configuração de Nichos e Subnichos do Swipe File
@@ -709,11 +709,13 @@ export default function Home() {
                     value={formData.formato_entrega} 
                     onChange={handleChange} 
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium cursor-pointer"
                   >
                     <option value="Vídeo">Vídeo</option>
                     <option value="PDF">PDF</option>
                     <option value="AppWeb">App Web</option>
+                    <option value="Drive">Drive</option>
+                    <option value="Comunidade WhatsApp">Comunidade WhatsApp</option>
                   </select>
                 </div>
 
