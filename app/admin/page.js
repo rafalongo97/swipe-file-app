@@ -91,7 +91,7 @@ export default function Admin() {
   };
 
   const handleAlterarSenhaAdmin = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!usuarioSelecionado) return;
     if (novaSenha.length < 6) {
       alert('A senha deve conter no mínimo 6 caracteres.');
@@ -455,7 +455,7 @@ export default function Admin() {
               {/* Formulário Alterar Senha */}
               <div className="border-t border-gray-150 dark:border-zinc-800 pt-4">
                 <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Alterar Senha</h4>
-                <form onSubmit={handleAlterarSenhaAdmin} className="space-y-3">
+                <div className="space-y-3">
                   <div className="relative">
                     <input 
                       type={showPassword ? "text" : "password"}
@@ -485,13 +485,14 @@ export default function Admin() {
                     </button>
                   </div>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleAlterarSenhaAdmin}
                     disabled={salvandoSenha}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition disabled:opacity-50 text-sm cursor-pointer"
                   >
                     {salvandoSenha ? 'Alterando...' : 'Salvar Nova Senha'}
                   </button>
-                </form>
+                </div>
               </div>
 
               {/* Botão de Exclusão */}
