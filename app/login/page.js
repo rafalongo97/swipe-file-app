@@ -8,6 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +16,12 @@ export default function Login() {
   useEffect(() => {
     const isDarkTheme = document.documentElement.classList.contains('dark');
     setIsDark(isDarkTheme);
+
+    const query = new URLSearchParams(window.location.search);
+    const msg = query.get('mensagem');
+    if (msg) {
+      setSucesso(msg);
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -88,6 +95,12 @@ export default function Login() {
         {erro && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 dark:border-red-600 text-red-700 dark:text-red-300 text-sm rounded-r-md">
             {erro}
+          </div>
+        )}
+
+        {sucesso && (
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500 dark:border-green-600 text-green-700 dark:text-green-300 text-sm rounded-r-md">
+            {sucesso}
           </div>
         )}
 
