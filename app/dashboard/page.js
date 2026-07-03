@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [filtroNicho, setFiltroNicho] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'ativos', 'inativos'
   const [selectedFunilStatus, setSelectedFunilStatus] = useState('Todas');
+  const [filtroTempoAtivo, setFiltroTempoAtivo] = useState('Todas');
 
   // Estados de exclusão
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -90,7 +91,35 @@ export default function Dashboard() {
     // 4. Filtro por Status do Funil
     const matchFunilStatus = selectedFunilStatus === 'Todas' || (oferta.status_funil || 'Em análise') === selectedFunilStatus;
 
-    return matchBusca && matchNicho && matchStatus && matchFunilStatus;
+    // 5. Filtro por Tempo Ativo (data_primeiro_anuncio)
+    let matchTempoAtivo = true;
+    if (filtroTempoAtivo !== 'Todas') {
+      if (!oferta.data_primeiro_anuncio) {
+        matchTempoAtivo = false;
+      } else {
+        const dataAnuncio = new Date(oferta.data_primeiro_anuncio);
+        const dataAtual = new Date();
+        
+        // Zera horas para focar nos dias calendários
+        dataAnuncio.setHours(0, 0, 0, 0);
+        dataAtual.setHours(0, 0, 0, 0);
+        
+        const diferencaMs = dataAtual.getTime() - dataAnuncio.getTime();
+        const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+        
+        if (filtroTempoAtivo === '30') {
+          matchTempoAtivo = diferencaDias >= 0 && diferencaDias <= 30;
+        } else if (filtroTempoAtivo === '60') {
+          matchTempoAtivo = diferencaDias >= 0 && diferencaDias <= 60;
+        } else if (filtroTempoAtivo === '90') {
+          matchTempoAtivo = diferencaDias >= 0 && diferencaDias <= 90;
+        } else if (filtroTempoAtivo === '90+') {
+          matchTempoAtivo = diferencaDias > 90;
+        }
+      }
+    }
+
+    return matchBusca && matchNicho && matchStatus && matchFunilStatus && matchTempoAtivo;
   });
 
   const obterTempoAtivo = (dataPrimeiroAnuncio) => {
@@ -293,7 +322,7 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              {/* Status & Funnel Filters Container (stacked on mobile, side-by-side on desktop) */}
+              {/* Status, Funnel & Active Time Filters Container (stacked on mobile, side-by-side on desktop) */}
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 {/* Filtro Status */}
                 <div className="w-full sm:w-40">
@@ -322,16 +351,32 @@ export default function Dashboard() {
                     <option value="Descartado">Descartado</option>
                   </select>
                 </div>
+
+                {/* Filtro de Tempo Ativo */}
+                <div className="w-full sm:w-48">
+                  <select
+                    value={filtroTempoAtivo}
+                    onChange={(e) => setFiltroTempoAtivo(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-medium transition shadow-sm cursor-pointer"
+                  >
+                    <option value="Todas">Filtrar por Tempo Ativo</option>
+                    <option value="30">Até 30 dias</option>
+                    <option value="60">Até 60 dias</option>
+                    <option value="90">Até 90 dias</option>
+                    <option value="90+">Acima de 90 dias</option>
+                  </select>
+                </div>
               </div>
 
               {/* Botão de Limpar Filtros */}
-              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas') && (
+              {(filtroBusca || filtroNicho || filtroStatus !== 'todos' || selectedFunilStatus !== 'Todas' || filtroTempoAtivo !== 'Todas') && (
                 <button
                   onClick={() => {
                     setFiltroBusca('');
                     setFiltroNicho('');
                     setFiltroStatus('todos');
                     setSelectedFunilStatus('Todas');
+                    setFiltroTempoAtivo('Todas');
                   }}
                   className="px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 font-bold transition text-sm whitespace-nowrap cursor-pointer shadow-sm"
                 >
@@ -371,6 +416,7 @@ export default function Dashboard() {
                 setFiltroNicho('');
                 setFiltroStatus('todos');
                 setSelectedFunilStatus('Todas');
+                setFiltroTempoAtivo('Todas');
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold transition text-sm cursor-pointer"
             >
