@@ -361,12 +361,15 @@ export default function Dashboard() {
               >
                 {isDark ? '☀️' : '🌙'}
               </button>
-              <a href="/dashboard" className="text-sm font-semibold text-blue-600 transition">
+              <Link href="/dashboard" className="text-sm font-semibold text-blue-600 transition">
                 Dashboard
-              </a>
+              </Link>
+              <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
+                Acervo de Drive
+              </Link>
               <button 
                 onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
-                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition"
+                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition cursor-pointer"
               >
                 Sair
               </button>
