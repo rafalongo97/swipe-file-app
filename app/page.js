@@ -505,8 +505,8 @@ export default function Home() {
               >
                 {isDark ? '☀️' : '🌙'}
               </button>
-              <Link href="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
-                Dashboard
+              <Link href="/swipe" className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
+                Swipe File
               </Link>
               <Link href="/acervo" className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
                 Acervo de Drive
@@ -567,11 +567,11 @@ export default function Home() {
             
             <nav className="flex flex-col gap-6 flex-1">
               <Link 
-                href="/dashboard" 
+                href="/swipe" 
                 onClick={() => setMenuOpen(false)}
                 className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
               >
-                Dashboard
+                Swipe File
               </Link>
               <Link 
                 href="/acervo" 
@@ -639,10 +639,10 @@ export default function Home() {
             </p>
           </div>
           <a 
-            href="/dashboard" 
+            href="/swipe" 
             className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition"
           >
-            ← Voltar para o Dashboard
+            ← Voltar para o Swipe File
           </a>
         </div>
 
@@ -1043,10 +1043,10 @@ export default function Home() {
               </button>
               
               <a 
-                href="/dashboard" 
+                href="/swipe" 
                 className="w-full sm:w-auto bg-gray-100 text-gray-700 font-bold py-3.5 px-8 rounded-lg hover:bg-gray-200 transition duration-300 text-center flex items-center justify-center border border-gray-200"
               >
-                Ver Dashboard
+                Ver Swipe File
               </a>
             </div>
 

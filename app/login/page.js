@@ -89,7 +89,7 @@ export default function Login() {
         setCarregando(false);
       } else {
         // Se der certo, redireciona o usuário para o Dashboard
-        window.location.href = '/dashboard';
+        window.location.href = '/swipe';
       }
     }
   };

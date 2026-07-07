@@ -49,7 +49,7 @@ export default function Admin() {
 
       if (session.user.email !== 'rafael.longo97@gmail.com') {
         alert('Acesso negado: Rota exclusiva para o administrador.');
-        window.location.href = '/dashboard';
+        window.location.href = '/swipe';
         return;
       }
 
@@ -214,8 +214,8 @@ export default function Admin() {
               >
                 {isDark ? '☀️' : '🌙'}
               </button>
-              <Link href="/dashboard" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Dashboard
+              <Link href="/swipe" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
+                Swipe File
               </Link>
               <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
                 Acervo de Drive
@@ -266,11 +266,11 @@ export default function Admin() {
             
             <nav className="flex flex-col gap-6 flex-1">
               <Link 
-                href="/dashboard" 
+                href="/swipe" 
                 onClick={() => setMenuOpen(false)}
                 className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
               >
-                Dashboard
+                Swipe File
               </Link>
               <Link 
                 href="/acervo" 

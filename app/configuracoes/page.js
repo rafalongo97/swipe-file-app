@@ -229,8 +229,8 @@ export default function Configuracoes() {
               >
                 {isDark ? '☀️' : '🌙'}
               </button>
-              <Link href="/dashboard" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Dashboard
+              <Link href="/swipe" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
+                Swipe File
               </Link>
               <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
                 Acervo de Drive
@@ -289,11 +289,11 @@ export default function Configuracoes() {
             
             <nav className="flex flex-col gap-6 flex-1">
               <Link 
-                href="/dashboard" 
+                href="/swipe" 
                 onClick={() => setMenuOpen(false)}
                 className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
               >
-                Dashboard
+                Swipe File
               </Link>
               <Link 
                 href="/acervo" 
@@ -457,7 +457,7 @@ export default function Configuracoes() {
 
             <div className="flex gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
               <Link 
-                href="/dashboard"
+                href="/swipe"
                 className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2.5 rounded-lg text-center transition text-sm cursor-pointer border border-gray-200 dark:border-gray-700"
               >
                 Voltar
