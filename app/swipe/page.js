@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   // Estados dos filtros
   const [filtroBusca, setFiltroBusca] = useState('');
-  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null });
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null, criadoPorIsAdmin: false });
 
   useEffect(() => {
     async function carregarHistoricoNomes() {
@@ -54,17 +54,22 @@ export default function Dashboard() {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, nome')
+        .select('id, nome, is_admin')
         .in('id', ids);
         
       if (!error && data) {
         const map = {};
-        data.forEach(p => { map[p.id] = p.nome; });
+        const adminMap = {};
+        data.forEach(p => { 
+          map[p.id] = p.nome; 
+          adminMap[p.id] = p.is_admin === true;
+        });
         const dataFormatada = updatedAt ? new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         setHistoricoNomes({
           criadoPor: map[createdBy] || 'Desconhecido',
           editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido',
-          atualizadoEm: dataFormatada
+          atualizadoEm: dataFormatada,
+          criadoPorIsAdmin: adminMap[createdBy] || false
         });
       } else {
         setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido', atualizadoEm: null });
@@ -123,7 +128,7 @@ export default function Dashboard() {
       // Se passou pelo cadeado, busca as ofertas
       const { data, error } = await supabase
         .from('ofertas_swipe_file')
-        .select('*')
+        .select('*, profiles!created_by(nome, is_admin)')
         .order('created_at', { ascending: false });
 
       if (!error) {
@@ -666,6 +671,14 @@ export default function Dashboard() {
                             <span className="ml-1.5 text-sm" title="Oferta Escalada">🚀</span>
                           )}
                         </div>
+                        <div className="text-[11px] text-gray-500 mt-1 pl-7 flex items-center gap-1.5">
+                          <span>Criado por: <span className="font-semibold text-gray-700 dark:text-gray-300">{oferta.profiles?.nome || 'Desconhecido'}</span></span>
+                          {oferta.profiles?.is_admin === true && (
+                            <span className="inline-flex items-center gap-1 bg-purple-900/10 text-purple-700 dark:bg-purple-955/40 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-900/30">
+                              🛡️ Admin
+                            </span>
+                          )}
+                        </div>
                         {oferta.tags && (
                           <div className="flex flex-wrap gap-1 mt-1 pl-7">
                             {oferta.tags.split(',').map((tag, i) => (
@@ -842,10 +855,15 @@ export default function Dashboard() {
               </div>
 
               {/* Histórico de Edição */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
-                <p className="text-xs text-gray-500">
-                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
+                <p className="text-xs text-gray-555 dark:text-gray-405 flex items-center gap-1.5">
+                  Criado por: <span className="font-semibold text-gray-700 dark:text-gray-300">{historicoNomes.criadoPor}</span>
+                  {historicoNomes.criadoPorIsAdmin && (
+                    <span className="inline-flex items-center gap-1 bg-purple-900/10 text-purple-700 dark:bg-purple-955/45 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-900/30">
+                      🛡️ Admin
+                    </span>
+                  )}
                 </p>
                 {historicoNomes.atualizadoEm && (
                   <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
