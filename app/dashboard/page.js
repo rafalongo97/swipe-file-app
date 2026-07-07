@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -19,6 +19,16 @@ const MOCK_DATA = [
     formato_entrega: 'Vídeo',
     esta_escalada: true,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-05-23',
+    idioma_mercado: 'BR',
+    status_funil: 'Para modelar',
+    tags: 'afiliados, tráfego pago, VSL',
+    valor_front: 97.00,
+    nomes_order_bumps: JSON.stringify([{ nome: 'Kit Planilhas Aceleradoras', valor: 19.90 }, { nome: 'Acesso Vitalício', valor: 9.90 }]),
+    notas_modelagem: 'Página de vendas foca muito em ganhos rápidos e prova social com prints de comissões de afiliados. VSL de 12 minutos bem agressiva.',
+    created_by: 'user-1',
+    atualizado_por: 'user-1',
+    atualizado_em: '2026-07-07T10:30:00Z',
   },
   {
     id: '2',
@@ -32,6 +42,16 @@ const MOCK_DATA = [
     formato_entrega: 'Ebook',
     esta_escalada: true,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-06-05',
+    idioma_mercado: 'BR',
+    status_funil: 'Já testei',
+    tags: 'PLR, emagrecimento, lowcarb',
+    valor_front: 47.00,
+    nomes_order_bumps: JSON.stringify([{ nome: 'Protocolo Chá Seca Tudo', valor: 14.90 }]),
+    notas_modelagem: 'Criativos focados em receitas caseiras e fáceis. O checkout tem 2 bumps agregando valor à oferta principal.',
+    created_by: 'user-1',
+    atualizado_por: 'user-2',
+    atualizado_em: '2026-07-07T11:45:00Z',
   },
   {
     id: '3',
@@ -45,12 +65,22 @@ const MOCK_DATA = [
     formato_entrega: 'Vídeo',
     esta_escalada: false,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-06-22',
+    idioma_mercado: 'ES',
+    status_funil: 'Em análise',
+    tags: 'sedução, relacionamentos, whatsapp',
+    valor_front: 197.00,
+    nomes_order_bumps: '',
+    notas_modelagem: 'Funil direto para o WhatsApp. Script de vendas focado em quebra de objeções rápidas e gatilho da escassez.',
+    created_by: 'user-2',
+    atualizado_por: 'user-2',
+    atualizado_em: '2026-07-06T15:20:00Z',
   },
   {
     id: '4',
     nome_produto: 'Inglês em 90 Dias',
     nicho: 'Hobbies & Profissões',
-    subnicho: 'Idiomas',
+    subnicho: 'Idiomas / Inglês',
     tempo_ativo: 60,
     qtd_criativos: 35,
     mercado: 'BR',
@@ -58,6 +88,16 @@ const MOCK_DATA = [
     formato_entrega: 'Vídeo',
     esta_escalada: true,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-05-08',
+    idioma_mercado: 'BR',
+    status_funil: 'Já testei',
+    tags: 'curso, inglês, conversação',
+    valor_front: 297.00,
+    nomes_order_bumps: JSON.stringify([{ nome: 'Guia de Pronúncia Prática', valor: 29.90 }]),
+    notas_modelagem: 'Anúncios com professores nativos gerando lead para evento de lançamento gravado. Página de checkout premium.',
+    created_by: 'user-1',
+    atualizado_por: 'user-1',
+    atualizado_em: '2026-07-05T09:12:00Z',
   },
   {
     id: '5',
@@ -71,12 +111,22 @@ const MOCK_DATA = [
     formato_entrega: 'SaaS',
     esta_escalada: false,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-06-27',
+    idioma_mercado: 'US',
+    status_funil: 'Em análise',
+    tags: 'planner, finanças, planilha',
+    valor_front: 29.00,
+    nomes_order_bumps: '',
+    notas_modelagem: 'Funil em inglês. Anúncios minimalistas focados em organização pessoal e produtividade.',
+    created_by: 'user-2',
+    atualizado_por: 'user-2',
+    atualizado_em: '2026-06-28T14:40:00Z',
   },
   {
     id: '6',
     nome_produto: 'Copywriter High-Ticket',
     nicho: 'Desenvolvimento Pessoal',
-    subnicho: 'Autoajuda',
+    subnicho: 'Oratória / Inteligência Emocional',
     tempo_ativo: 40,
     qtd_criativos: 14,
     mercado: 'BR',
@@ -84,6 +134,16 @@ const MOCK_DATA = [
     formato_entrega: 'Mentoria',
     esta_escalada: true,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-05-28',
+    idioma_mercado: 'BR',
+    status_funil: 'Para modelar',
+    tags: 'mentoria, high-ticket, copywriting',
+    valor_front: 997.00,
+    nomes_order_bumps: '',
+    notas_modelagem: 'Estilo de criativo cinematográfico com histórias reais de transformação de alunos. Filtro forte de qualificação no formulário.',
+    created_by: 'user-1',
+    atualizado_por: 'user-2',
+    atualizado_em: '2026-07-06T18:05:00Z',
   },
   {
     id: '7',
@@ -97,6 +157,16 @@ const MOCK_DATA = [
     formato_entrega: 'SaaS',
     esta_escalada: false,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-06-09',
+    idioma_mercado: 'US',
+    status_funil: 'Em análise',
+    tags: 'saas, nocode, bubble',
+    valor_front: 49.00,
+    nomes_order_bumps: JSON.stringify([{ nome: 'Templates Prontos Premium', valor: 19.00 }]),
+    notas_modelagem: 'Demonstração em vídeo de 2 minutos do software funcionando. Alto CTR nos criativos com foco prático.',
+    created_by: 'user-2',
+    atualizado_por: 'user-1',
+    atualizado_em: '2026-07-04T12:00:00Z',
   },
   {
     id: '8',
@@ -110,6 +180,16 @@ const MOCK_DATA = [
     formato_entrega: 'Áudio',
     esta_escalada: true,
     status_ativo: true,
+    data_primeiro_anuncio: '2026-05-18',
+    idioma_mercado: 'BR',
+    status_funil: 'Já testei',
+    tags: 'meditação, mindfulness, áudio',
+    valor_front: 19.90,
+    nomes_order_bumps: '',
+    notas_modelagem: 'Aplicativo de áudios guiados. Criativos focados no estresse diário corporativo e ansiedade.',
+    created_by: 'user-1',
+    atualizado_por: 'user-1',
+    atualizado_em: '2026-07-06T11:00:00Z',
   }
 ];
 
@@ -117,11 +197,15 @@ const MOCK_DATA = [
 const COLORS_FORMAT = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#64748B'];
 const COLORS_NICHO = ['#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B', '#EF4444'];
 
-export default function Dashboard() {
+﻿export default function Dashboard() {
   const [isDark, setIsDark] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // Modal state
+  const [ofertaSelecionada, setOfertaSelecionada] = useState(null);
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null });
 
   useEffect(() => {
     setMounted(true);
@@ -164,9 +248,42 @@ export default function Dashboard() {
     verificarAcesso();
   }, []);
 
+  // Fetch creator names for detail modal (mocked)
+  useEffect(() => {
+    if (!ofertaSelecionada) return;
+    setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null });
+    const createdBy = ofertaSelecionada.created_by;
+    const updatedBy = ofertaSelecionada.atualizado_por;
+    const updatedAt = ofertaSelecionada.atualizado_em;
+
+    const mockUserMap = {
+      'user-1': 'Rafael Longo',
+      'user-2': 'Admin Master',
+    };
+
+    const dataFormatada = updatedAt
+      ? new Date(updatedAt).toLocaleDateString('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        })
+      : null;
+
+    setTimeout(() => {
+      setHistoricoNomes({
+        criadoPor: mockUserMap[createdBy] || 'Desconhecido',
+        editadoPor: mockUserMap[updatedBy] || 'Desconhecido',
+        atualizadoEm: dataFormatada
+      });
+    }, 150);
+  }, [ofertaSelecionada]);
+
   // Summary Metrics calculations
   const totalEscaladas = MOCK_DATA.filter(item => item.esta_escalada).length;
   const totalMais30Dias = MOCK_DATA.filter(item => item.tempo_ativo >= 30).length;
+
+  // Total items counts for charts central values
+  const totalFormatosCount = MOCK_DATA.length;
+  const totalNichosCount = MOCK_DATA.length;
 
   // Format Distribution calculations
   const formatMap = {};
@@ -193,7 +310,106 @@ export default function Dashboard() {
     .sort((a, b) => b.qtd_criativos - a.qtd_criativos)
     .slice(0, 5);
 
-  return (
+  // Helper functions for modal details
+  const obterTempoAtivo = (dataPrimeiroAnuncio) => {
+    if (!dataPrimeiroAnuncio) return 'Sem registro';
+    const dataAnuncio = new Date(dataPrimeiroAnuncio);
+    const dataAtual = new Date();
+    dataAnuncio.setHours(0, 0, 0, 0);
+    dataAtual.setHours(0, 0, 0, 0);
+    const diferencaMs = dataAtual.getTime() - dataAnuncio.getTime();
+    const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+    if (diferencaDias < 0) return 'Data futura';
+    if (diferencaDias === 0) return 'Ativo hoje';
+    if (diferencaDias === 1) return 'Ativo há 1 dia';
+    return `Ativo há ${diferencaDias} dias`;
+  };
+
+  const formatarPreco = (valor) => {
+    if (valor === null || valor === undefined || valor === "") return '-';
+    return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  };
+
+  const renderStatusFunilBadge = (status) => {
+    const val = status || 'Em análise';
+    let classes = 'bg-gray-250 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    if (val === 'Em análise') {
+      classes = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300';
+    } else if (val === 'Para modelar') {
+      classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
+    } else if (val === 'Já testei') {
+      classes = 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300';
+    } else if (val === 'Descartado') {
+      classes = 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    }
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${classes}`}>
+        {val}
+      </span>
+    );
+  };
+
+  const renderTipoOfertaBadges = (oferta) => {
+    let tipos = [];
+    if (oferta.tipo_oferta && Array.isArray(oferta.tipo_oferta) && oferta.tipo_oferta.length > 0) {
+      tipos = oferta.tipo_oferta;
+    } else {
+      tipos = oferta.tipo_funil === 'X1' ? ['1X1'] : ['DR'];
+    }
+    return (
+      <div className="flex flex-wrap gap-1.5 items-center">
+        {tipos.map((tipo) => {
+          let classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
+          if (tipo === '1X1') {
+            classes = 'bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300';
+          }
+          return (
+            <span key={tipo} className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${classes}`}>
+              {tipo}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderOrderBumpsModal = (oferta) => {
+    if (!oferta.nomes_order_bumps) {
+      return <p className="text-xs text-gray-500 italic mt-1">Nenhum order bump registrado para esta oferta.</p>;
+    }
+    try {
+      const parsed = JSON.parse(oferta.nomes_order_bumps);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return (
+          <div className="flex flex-col gap-2 mt-2">
+            {parsed.map((bump, idx) => (
+              <div key={idx} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-xs px-3.5 py-2 rounded-lg font-medium shadow-2xs flex justify-between items-center">
+                <span>{bump.nome}</span>
+                {bump.valor !== null && bump.valor !== undefined && bump.valor !== "" && (
+                  <span className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/45 px-2 py-0.5 rounded-md border border-blue-100 dark:border-blue-900/30">
+                    {formatarPreco(bump.valor)}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-2">
+        {oferta.nomes_order_bumps.split(',').map((bump, idx) => (
+          <span key={idx} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-xs px-2.5 py-1 rounded-md font-medium shadow-2xs">
+            {bump.trim()}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+﻿  return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
       {/* Top Navbar */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 shadow-sm transition-colors duration-300">
@@ -311,9 +527,9 @@ export default function Dashboard() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-            Client Dashboard
+            Dashboard
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-gray-550 dark:text-gray-400 mt-1">
             Análise geral do seu portfólio de ofertas e criativos ativos.
           </p>
         </div>
@@ -323,14 +539,15 @@ export default function Dashboard() {
           {/* Card 1: Total de Ofertas Escaladas */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md">
             <div>
-              <span className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
                 Total de Ofertas Escaladas
               </span>
               <span className="text-3xl font-black text-blue-600 dark:text-blue-500 mt-1 block">
                 {totalEscaladas}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 block">
-                Ofertas marcadas como escaladas no Swipe File
+              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Atualizado hoje
               </span>
             </div>
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/50 rounded-xl flex items-center justify-center text-2xl text-blue-600 dark:text-blue-400">
@@ -341,14 +558,15 @@ export default function Dashboard() {
           {/* Card 2: Ofertas Rodando há +30 Dias */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md">
             <div>
-              <span className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
                 Ofertas Rodando há +30 Dias
               </span>
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-500 mt-1 block">
                 {totalMais30Dias}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 block">
-                Tempo mínimo recomendado para validação sólida
+              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Atualizado hoje
               </span>
             </div>
             <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl flex items-center justify-center text-2xl text-emerald-600 dark:text-emerald-400">
@@ -360,12 +578,18 @@ export default function Dashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Chart 1: Distribuição por Formato */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col relative">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500 block"></span>
               Distribuição por Formato
             </h2>
-            <div className="h-64 flex items-center justify-center">
+            <div className="h-64 flex items-center justify-center relative">
+              {/* Central Value inside Donut */}
+              <div className="absolute flex flex-col items-center justify-center pointer-events-none z-0">
+                <span className="text-3xl font-black text-gray-900 dark:text-white">{totalFormatosCount}</span>
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-550 tracking-wider">Ofertas</span>
+              </div>
+              
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -377,6 +601,8 @@ export default function Dashboard() {
                       outerRadius={80}
                       paddingAngle={4}
                       dataKey="value"
+                      labelLine={false}
+                      label={({ percent }) => percent > 0.05 ? ((percent * 100).toFixed(0) + "%") : ""}
                     >
                       {dataFormat.map((entry, index) => (
                         <Cell key={"cell-" + index} fill={COLORS_FORMAT[index % COLORS_FORMAT.length]} />
@@ -400,12 +626,18 @@ export default function Dashboard() {
           </div>
 
           {/* Chart 2: Distribuição por Nicho */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col relative">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-violet-500 block"></span>
               Distribuição por Nicho
             </h2>
-            <div className="h-64 flex items-center justify-center">
+            <div className="h-64 flex items-center justify-center relative">
+              {/* Central Value inside Donut */}
+              <div className="absolute flex flex-col items-center justify-center pointer-events-none z-0">
+                <span className="text-3xl font-black text-gray-900 dark:text-white">{totalNichosCount}</span>
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-550 tracking-wider">Total</span>
+              </div>
+
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -417,6 +649,8 @@ export default function Dashboard() {
                       outerRadius={80}
                       paddingAngle={4}
                       dataKey="value"
+                      labelLine={false}
+                      label={({ percent }) => percent > 0.05 ? ((percent * 100).toFixed(0) + "%") : ""}
                     >
                       {dataNiche.map((entry, index) => (
                         <Cell key={"cell-" + index} fill={COLORS_NICHO[index % COLORS_NICHO.length]} />
@@ -446,8 +680,8 @@ export default function Dashboard() {
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
               🏆 Top 5 Ofertas Mais Escaladas
             </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Ordenadas pelo maior número de criativos ativos rodando.
+            <p className="text-xs text-gray-555 dark:text-gray-400 mt-1">
+              Clique em qualquer linha da tabela para visualizar todos os detalhes da oferta.
             </p>
           </div>
 
@@ -467,7 +701,8 @@ export default function Dashboard() {
                 {top5.map((item) => (
                   <tr 
                     key={item.id}
-                    className="hover:bg-gray-50/50 dark:hover:bg-gray-850/40 transition duration-150"
+                    onClick={() => setOfertaSelecionada(item)}
+                    className="cursor-pointer hover:bg-gray-50/75 dark:hover:bg-gray-800/40 transition duration-150"
                   >
                     <td className="p-4 font-bold text-gray-900 dark:text-white">
                       {item.nome_produto}
@@ -500,6 +735,177 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+﻿      {/* DETAIL MODAL FROM SWIPE/PAGE.JS */}
+      {ofertaSelecionada && (
+        <div 
+          onClick={() => setOfertaSelecionada(null)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-150 dark:border-gray-800 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[90vh] text-gray-900 dark:text-gray-100"
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-snug">
+                  {ofertaSelecionada.nome_produto}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Detalhes completos do Swipe File</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {renderTipoOfertaBadges(ofertaSelecionada)}
+                {ofertaSelecionada.status_ativo ? (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/40">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                    Ativo
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/40">
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                    Inativo
+                  </span>
+                )}
+                <button 
+                  onClick={() => setOfertaSelecionada(null)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 bg-gray-200/50 dark:bg-gray-800 p-2 rounded-full transition cursor-pointer"
+                  aria-label="Fechar"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Content (Scrollable) */}
+            <div className="overflow-y-auto p-6 space-y-6">
+              {/* Category & Status */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Nicho / Subnicho</span>
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {ofertaSelecionada.nicho || 'Não informado'} 
+                    {ofertaSelecionada.subnicho && ` > ${ofertaSelecionada.subnicho}`}
+                  </span>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tempo Ativo</span>
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {ofertaSelecionada.status_ativo === false ? (
+                      <span className="text-red-500 dark:text-red-400 font-bold">Oferta inativa</span>
+                    ) : (
+                      <>
+                        {obterTempoAtivo(ofertaSelecionada.data_primeiro_anuncio)} 
+                        {ofertaSelecionada.data_primeiro_anuncio && ` (desde ${ofertaSelecionada.data_primeiro_anuncio.split('-').reverse().join('/')})`}
+                      </>
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Funnel, Delivery & Language/Market */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Tipo de Funil</span>
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    {ofertaSelecionada.tipo_funil === 'DR' ? 'Direct Response (DR)' : ofertaSelecionada.tipo_funil === 'X1' ? 'Um a Um (X1)' : ofertaSelecionada.tipo_funil}
+                  </span>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Formato de Entrega</span>
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{ofertaSelecionada.formato_entrega}</span>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800 col-span-2 lg:col-span-1">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Idioma / Mercado</span>
+                  <span className="inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2.5 py-0.5 text-xs font-bold border border-gray-300 dark:border-gray-700">
+                    {ofertaSelecionada.idioma_mercado || 'BR'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Funnel Status & Tags */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800 flex flex-col justify-center items-start">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Status do Funil</span>
+                  {renderStatusFunilBadge(ofertaSelecionada.status_funil)}
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1.5">Tags</span>
+                  <div className="flex flex-wrap gap-1">
+                    {ofertaSelecionada.tags ? (
+                      ofertaSelecionada.tags.split(',').map((tag, i) => (
+                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
+                          {tag.trim()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-550 dark:text-gray-400 italic">Nenhuma tag registrada</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing Cards */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-100/50 dark:border-blue-900/30">
+                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Preço Front</span>
+                    <span className="text-sm font-bold text-blue-700 dark:text-blue-400 mt-1 block">
+                      {formatarPreco(ofertaSelecionada.valor_front)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Bumps Section */}
+              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Order Bumps</span>
+                {renderOrderBumpsModal(ofertaSelecionada)}
+              </div>
+
+              {/* Notas de Modelagem Section */}
+              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Notas de Modelagem</span>
+                {ofertaSelecionada.notas_modelagem ? (
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium whitespace-pre-wrap leading-relaxed">
+                    {ofertaSelecionada.notas_modelagem}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-550 dark:text-gray-400 italic">Nenhuma nota registrada para esta oferta.</p>
+                )}
+              </div>
+
+              {/* Histórico de Edição */}
+              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
+                <p className="text-xs text-gray-555 dark:text-gray-400">
+                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
+                </p>
+                {historicoNomes.atualizadoEm && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
+                    <span>🕒</span>
+                    Última atualização por{' '}
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.editadoPor}</span>
+                    {' '}em{' '}
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.atualizadoEm}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Footer with links */}
+            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 px-6 py-4 flex flex-wrap gap-2">
+              <button
+                onClick={() => setOfertaSelecionada(null)}
+                className="flex-1 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer"
+              >
+                Fechar Detalhes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
