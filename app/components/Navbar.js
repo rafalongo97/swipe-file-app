@@ -9,11 +9,13 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     async function carregarPerfil() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        setEmail(session.user.email || '');
         const { data, error } = await supabase
           .from('profiles')
           .select('is_admin, nome')
@@ -55,7 +57,7 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
               href="/dashboard" 
               className={`text-sm font-semibold transition ${
                 activePage === 'dashboard' 
-                  ? 'text-blue-600' 
+                  ? 'text-blue-600 font-bold' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
               }`}
             >
@@ -65,30 +67,29 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
               href="/swipe" 
               className={`text-sm font-semibold transition ${
                 activePage === 'swipe' 
-                  ? 'text-blue-600' 
+                  ? 'text-blue-600 font-bold' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
               }`}
             >
               Swipe File
             </Link>
-
-            {/* Toggle Theme Button */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-250 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-              title={isDark ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-              aria-label="Alternar Tema"
+            <Link 
+              href="/acervo" 
+              className={`text-sm font-semibold transition ${
+                activePage === 'acervo' 
+                  ? 'text-blue-600 font-bold' 
+                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
+              }`}
             >
-              {isDark ? '☀️' : '🌙'}
-            </button>
+              Acervo Drive
+            </Link>
 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shadow-xs cursor-pointer hover:bg-blue-700 transition"
+                className="w-9 h-9 rounded-full bg-blue-650 text-white font-bold text-sm flex items-center justify-center shadow-xs cursor-pointer hover:bg-blue-700 transition"
               >
                 {inicial}
               </button>
@@ -102,38 +103,31 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                     className="fixed inset-0 h-full w-full bg-transparent cursor-default outline-none z-20"
                   ></button>
 
-                  <div className="absolute right-0 mt-2 w-52 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-30 transform origin-top-right transition duration-250">
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-30 transform origin-top-right transition duration-250 text-left">
+                    {/* 1. Logged in user info */}
                     <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                       <p className="text-xs text-gray-400 font-medium">Logado como</p>
                       <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">{nome || 'Usuário'}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{email}</p>
                     </div>
 
-                    {/* Admin Specific Links */}
+                    {/* 2 & 3. Admin Links */}
                     {isAdmin && (
-                      <div className="border-b border-gray-100 dark:border-gray-700 py-1.5">
+                      <div className="py-1">
                         <Link 
                           href="/admin/dashboard" 
                           onClick={() => setDropdownOpen(false)}
-                          className={`flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 ${
-                            activePage === 'admin-dashboard' ? 'text-purple-650 font-bold' : 'text-purple-500'
+                          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 transition ${
+                            activePage === 'admin-dashboard' ? 'text-purple-600 font-bold' : 'text-purple-500 hover:text-purple-650'
                           }`}
                         >
-                          🛡️ Dashboard Admin
-                        </Link>
-                        <Link 
-                          href="/acervo" 
-                          onClick={() => setDropdownOpen(false)}
-                          className={`flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 ${
-                            activePage === 'acervo' ? 'text-gray-900 dark:text-gray-100 font-bold' : 'text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          📂 Acervo de Drive
+                          🛡️ Dashboard Adm
                         </Link>
                         <Link 
                           href="/admin" 
                           onClick={() => setDropdownOpen(false)}
-                          className={`flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 ${
-                            activePage === 'admin-panel' ? 'text-red-650' : 'text-red-500 hover:text-red-600'
+                          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 transition ${
+                            activePage === 'admin-panel' ? 'text-red-650 font-bold' : 'text-red-500 hover:text-red-600'
                           }`}
                         >
                           ⚙️ Painel Admin
@@ -141,22 +135,41 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                       </div>
                     )}
 
-                    {/* General Links */}
+                    {/* 4. Subtle divider */}
+                    {isAdmin && <hr className="border-gray-100 dark:border-gray-700 my-1" />}
+
+                    {/* 5, 6 & 7. General Items */}
                     <div className="py-1">
+                      {/* Theme Switcher Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toggleTheme();
+                          setDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition cursor-pointer text-left"
+                      >
+                        <span>{isDark ? '☀️' : '🌙'}</span>
+                        <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
+                      </button>
+
                       <Link 
                         href="/configuracoes" 
                         onClick={() => setDropdownOpen(false)}
-                        className={`flex items-center px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 ${
-                          activePage === 'configuracoes' ? 'text-blue-600' : 'text-gray-750 dark:text-gray-300'
+                        className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700/60 transition ${
+                          activePage === 'configuracoes' ? 'text-blue-600 font-bold' : 'text-gray-700 dark:text-gray-300'
                         }`}
                       >
-                        🔧 Configurações
+                        <span>🔧</span>
+                        <span>Configurações</span>
                       </Link>
+
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left flex items-center px-4 py-2 text-sm font-semibold text-red-500 hover:text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition cursor-pointer"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-500 hover:text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition cursor-pointer text-left"
                       >
-                        🚪 Sair
+                        <span>🚪</span>
+                        <span>Sair</span>
                       </button>
                     </div>
                   </div>
@@ -166,15 +179,7 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
           </nav>
 
           {/* Hamburger (Mobile) */}
-          <div className="flex md:hidden items-center gap-2">
-            {/* Toggle Theme Button Mobile */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-255 transition border border-gray-200 dark:border-gray-700"
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
+          <div className="flex md:hidden items-center">
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -192,7 +197,7 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
       {menuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex justify-end">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-xs" onClick={() => setMenuOpen(false)}></div>
-          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 z-50">
+          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 z-50 text-left">
             <div className="flex items-center justify-between mb-6">
               <span className="text-xl font-bold text-gray-900 dark:text-white">Menu</span>
               <button onClick={() => setMenuOpen(false)} className="text-gray-500 hover:text-gray-755 dark:text-gray-400">✕</button>
@@ -201,23 +206,26 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
               <div className="pb-4 border-b border-gray-150 dark:border-gray-800">
                 <p className="text-xs text-gray-400 font-medium">Logado como</p>
                 <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">{nome || 'Usuário'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{email}</p>
               </div>
 
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'dashboard' ? 'text-blue-600' : 'text-gray-750 dark:text-gray-200'}`}>
+              {/* Main Links */}
+              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'dashboard' ? 'text-blue-600 font-bold' : 'text-gray-750 dark:text-gray-200'}`}>
                 Dashboard
               </Link>
-              <Link href="/swipe" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'swipe' ? 'text-blue-650' : 'text-gray-755 dark:text-gray-200'}`}>
+              <Link href="/swipe" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'swipe' ? 'text-blue-600 font-bold' : 'text-gray-755 dark:text-gray-200'}`}>
                 Swipe File
               </Link>
+              <Link href="/acervo" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'acervo' ? 'text-blue-600 font-bold' : 'text-gray-755 dark:text-gray-200'}`}>
+                Acervo Drive
+              </Link>
 
+              {/* Admin Section */}
               {isAdmin && (
                 <>
                   <hr className="border-gray-150 dark:border-gray-800" />
                   <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'admin-dashboard' ? 'text-purple-650 font-bold' : 'text-purple-500'}`}>
-                    🛡️ Dashboard Admin
-                  </Link>
-                  <Link href="/acervo" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'acervo' ? 'text-blue-600' : 'text-gray-755 dark:text-gray-200'}`}>
-                    📂 Acervo de Drive
+                    🛡️ Dashboard Adm
                   </Link>
                   <Link href="/admin" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'admin-panel' ? 'text-red-650' : 'text-red-500'}`}>
                     ⚙️ Painel Admin
@@ -226,8 +234,22 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
               )}
 
               <hr className="border-gray-150 dark:border-gray-800" />
-              <Link href="/configuracoes" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'configuracoes' ? 'text-blue-600' : 'text-gray-750 dark:text-gray-205'}`}>
-                🔧 Configurações
+
+              {/* Theme toggle in mobile */}
+              <button
+                type="button"
+                onClick={() => {
+                  toggleTheme();
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2 text-base font-semibold text-gray-750 dark:text-gray-200 transition text-left cursor-pointer"
+              >
+                <span>{isDark ? '☀️' : '🌙'}</span>
+                <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
+              </button>
+
+              <Link href="/configuracoes" onClick={() => setMenuOpen(false)} className={`text-base font-semibold transition ${activePage === 'configuracoes' ? 'text-blue-600' : 'text-gray-750 dark:text-gray-200'}`}>
+                <span>🔧</span> Configurações
               </Link>
 
               <button
