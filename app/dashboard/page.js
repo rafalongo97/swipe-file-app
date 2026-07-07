@@ -39,7 +39,7 @@ export default function Dashboard() {
       if (!ofertaSelecionada) return;
       setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
       const createdBy = ofertaSelecionada.created_by;
-      const updatedBy = ofertaSelecionada.updated_by;
+      const updatedBy = ofertaSelecionada.atualizado_por;
       const updatedAt = ofertaSelecionada.atualizado_em;
       
       const ids = [];

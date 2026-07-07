@@ -63,7 +63,7 @@ export default function AcervoPage() {
       if (!acervoDetalhes) return;
       setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
       const createdBy = acervoDetalhes.created_by;
-      const updatedBy = acervoDetalhes.updated_by;
+      const updatedBy = acervoDetalhes.atualizado_por;
       const updatedAt = acervoDetalhes.atualizado_em;
       
       const ids = [];
@@ -153,7 +153,6 @@ export default function AcervoPage() {
         nome_acervo: formDataEdicao.nome_acervo.trim(),
         url_drive: formDataEdicao.url_drive.trim(),
         nicho: formDataEdicao.nicho,
-        updated_by: user ? user.id : null,
         atualizado_por: user ? user.id : null,
         atualizado_em: new Date().toISOString()
       })
@@ -244,7 +243,6 @@ export default function AcervoPage() {
       nicho: formData.nicho,
       user_id: user ? user.id : null,
       created_by: user ? user.id : null,
-      updated_by: user ? user.id : null,
       atualizado_por: user ? user.id : null,
       atualizado_em: new Date().toISOString()
     };
