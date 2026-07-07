@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   // Estados dos filtros
   const [filtroBusca, setFiltroBusca] = useState('');
-  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null });
 
   useEffect(() => {
     async function carregarHistoricoNomes() {
@@ -40,13 +40,14 @@ export default function Dashboard() {
       setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
       const createdBy = ofertaSelecionada.created_by;
       const updatedBy = ofertaSelecionada.updated_by;
+      const updatedAt = ofertaSelecionada.atualizado_em;
       
       const ids = [];
       if (createdBy) ids.push(createdBy);
       if (updatedBy && !ids.includes(updatedBy)) ids.push(updatedBy);
       
       if (ids.length === 0) {
-        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido', atualizadoEm: updatedAt ? new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null });
         return;
       }
       
@@ -58,12 +59,14 @@ export default function Dashboard() {
       if (!error && data) {
         const map = {};
         data.forEach(p => { map[p.id] = p.nome; });
+        const dataFormatada = updatedAt ? new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         setHistoricoNomes({
           criadoPor: map[createdBy] || 'Desconhecido',
-          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido'
+          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido',
+          atualizadoEm: dataFormatada
         });
       } else {
-        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido', atualizadoEm: null });
       }
     }
     carregarHistoricoNomes();
@@ -980,8 +983,17 @@ export default function Dashboard() {
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
                 <p className="text-xs text-gray-500">
-                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span> | Editado por: <span className="font-semibold">{historicoNomes.editadoPor}</span>
+                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
                 </p>
+                {historicoNomes.atualizadoEm && (
+                  <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                    <span className="text-gray-400">&#128336;</span>
+                    Última atualização por{' '}
+                    <span className="font-semibold text-gray-600">{historicoNomes.editadoPor}</span>
+                    {' '}em{' '}
+                    <span className="font-semibold text-gray-600">{historicoNomes.atualizadoEm}</span>
+                  </p>
+                )}
               </div>
             </div>
 

@@ -55,7 +55,7 @@ export default function AcervoPage() {
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
   const [menuOpen, setMenuOpen] = useState(false);
   const [acervoDetalhes, setAcervoDetalhes] = useState(null);
-  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
+  const [historicoNomes, setHistoricoNomes] = useState({ criadoPor: 'Carregando...', editadoPor: 'Carregando...', atualizadoEm: null });
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -64,13 +64,14 @@ export default function AcervoPage() {
       setHistoricoNomes({ criadoPor: 'Carregando...', editadoPor: 'Carregando...' });
       const createdBy = acervoDetalhes.created_by;
       const updatedBy = acervoDetalhes.updated_by;
+      const updatedAt = acervoDetalhes.atualizado_em;
       
       const ids = [];
       if (createdBy) ids.push(createdBy);
       if (updatedBy && !ids.includes(updatedBy)) ids.push(updatedBy);
       
       if (ids.length === 0) {
-        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido', atualizadoEm: updatedAt ? new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null });
         return;
       }
       
@@ -82,12 +83,14 @@ export default function AcervoPage() {
       if (!error && data) {
         const map = {};
         data.forEach(p => { map[p.id] = p.nome; });
+        const dataFormatada = updatedAt ? new Date(updatedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
         setHistoricoNomes({
           criadoPor: map[createdBy] || 'Desconhecido',
-          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido'
+          editadoPor: map[updatedBy] || map[createdBy] || 'Desconhecido',
+          atualizadoEm: dataFormatada
         });
       } else {
-        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido' });
+        setHistoricoNomes({ criadoPor: 'Desconhecido', editadoPor: 'Desconhecido', atualizadoEm: null });
       }
     }
     carregarHistoricoNomes();
@@ -150,7 +153,9 @@ export default function AcervoPage() {
         nome_acervo: formDataEdicao.nome_acervo.trim(),
         url_drive: formDataEdicao.url_drive.trim(),
         nicho: formDataEdicao.nicho,
-        updated_by: user ? user.id : null
+        updated_by: user ? user.id : null,
+        atualizado_por: user ? user.id : null,
+        atualizado_em: new Date().toISOString()
       })
       .eq('id', acervoEmEdicao.id);
 
@@ -239,7 +244,9 @@ export default function AcervoPage() {
       nicho: formData.nicho,
       user_id: user ? user.id : null,
       created_by: user ? user.id : null,
-      updated_by: user ? user.id : null
+      updated_by: user ? user.id : null,
+      atualizado_por: user ? user.id : null,
+      atualizado_em: new Date().toISOString()
     };
 
     const { error } = await supabase
@@ -797,8 +804,16 @@ export default function AcervoPage() {
               <div className="border-t border-gray-100 dark:border-gray-800 pt-3">
                 <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Histórico</span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span> | Editado por: <span className="font-semibold">{historicoNomes.editadoPor}</span>
+                  Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
                 </span>
+                {historicoNomes.atualizadoEm && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    Última atualização por{' '}
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.editadoPor}</span>
+                    {' '}em{' '}
+                    <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.atualizadoEm}</span>
+                  </p>
+                )}
               </div>
 
               {/* Actions Grid */}

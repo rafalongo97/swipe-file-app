@@ -389,7 +389,9 @@ export default function Home() {
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
       nomes_order_bumps: formData.qtd_order_bump > 0 ? JSON.stringify(sanitizedBumps) : '',
-      updated_by: user ? user.id : null
+      updated_by: user ? user.id : null,
+      atualizado_por: user ? user.id : null,
+      atualizado_em: new Date().toISOString()
     };
 
     if (!editId) {
