@@ -95,6 +95,13 @@ export default function Home() {
         window.location.href = '/login';
         return;
       }
+
+      // REDIRECT LOGGED IN USER TO /dashboard unless they have search params (edit or new)
+      const searchParams = new URLSearchParams(window.location.search);
+      if (!searchParams.has('edit') && !searchParams.has('new')) {
+        window.location.href = '/dashboard';
+        return;
+      }
       
       setCarregandoAuth(false);
 

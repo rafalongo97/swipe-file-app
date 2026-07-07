@@ -562,7 +562,7 @@ export default function Dashboard() {
           </div>
           <div>
             <Link 
-              href="/" 
+              href="/?new=true" 
               className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-800 font-bold transition duration-350 gap-2 cursor-pointer"
             >
               <span>+ Nova Oferta</span>
@@ -733,7 +733,7 @@ export default function Dashboard() {
             <h3 className="text-lg font-bold text-gray-950 mb-2">Nenhuma oferta salva ainda</h3>
             <p className="text-gray-500 mb-6 text-sm">Comece a construir seu arquivo de referências adicionando a sua primeira oferta activa.</p>
             <Link 
-              href="/" 
+              href="/?new=true" 
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg shadow hover:bg-blue-700 font-bold transition text-sm"
             >
               Criar primeira oferta

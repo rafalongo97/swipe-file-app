@@ -300,6 +300,10 @@ export default function Dashboard() {
     );
   }
 
+  // Exact center coordinates for Donut charts
+  const cx = '50%';
+  const cy = '50%';
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
       {/* Top Navbar */}
@@ -480,8 +484,8 @@ export default function Dashboard() {
                   <PieChart>
                     <Pie
                       data={dataFormat}
-                      cx="50%"
-                      cy="50%"
+                      cx={cx}
+                      cy={cy}
                       innerRadius={45}
                       outerRadius={65}
                       paddingAngle={4}
@@ -504,22 +508,22 @@ export default function Dashboard() {
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
                     {/* SVG Center Text */}
                     <text
-                      x="50%"
-                      y="50%"
-                      dy={-6}
+                      x={cx}
+                      y={cy}
                       textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-gray-900 dark:fill-white font-black text-2xl"
+                      dominantBaseline="central"
+                      className="fill-gray-900 dark:fill-white font-black"
+                      fontSize={32}
                     >
                       {totalFormatosCount}
                     </text>
                     <text
-                      x="50%"
-                      y="50%"
-                      dy={14}
+                      x={cx}
+                      y={cy}
+                      dy={28}
                       textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[9px] uppercase tracking-wider"
+                      dominantBaseline="central"
+                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[10px] uppercase tracking-wider"
                     >
                       Ofertas
                     </text>
@@ -543,8 +547,8 @@ export default function Dashboard() {
                   <PieChart>
                     <Pie
                       data={dataNiche}
-                      cx="50%"
-                      cy="50%"
+                      cx={cx}
+                      cy={cy}
                       innerRadius={45}
                       outerRadius={65}
                       paddingAngle={4}
@@ -567,22 +571,22 @@ export default function Dashboard() {
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
                     {/* SVG Center Text */}
                     <text
-                      x="50%"
-                      y="50%"
-                      dy={-6}
+                      x={cx}
+                      y={cy}
                       textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-gray-900 dark:fill-white font-black text-2xl"
+                      dominantBaseline="central"
+                      className="fill-gray-900 dark:fill-white font-black"
+                      fontSize={32}
                     >
                       {totalNichosCount}
                     </text>
                     <text
-                      x="50%"
-                      y="50%"
-                      dy={14}
+                      x={cx}
+                      y={cy}
+                      dy={28}
                       textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[9px] uppercase tracking-wider"
+                      dominantBaseline="central"
+                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[10px] uppercase tracking-wider"
                     >
                       Total
                     </text>
