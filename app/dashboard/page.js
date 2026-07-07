@@ -294,7 +294,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Carregando dados do painel...</p>
+          <p className="text-gray-550 dark:text-gray-400 font-medium">Carregando dados do painel...</p>
         </div>
       </div>
     );
@@ -302,7 +302,7 @@ export default function Dashboard() {
 
   // Exact center coordinates for Donut charts
   const cx = '50%';
-  const cy = '50%';
+  const cy = 100;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
@@ -506,26 +506,14 @@ export default function Dashboard() {
                       }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
-                    {/* SVG Center Text */}
-                    <text
-                      x={cx}
-                      y={cy}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-gray-900 dark:fill-white font-black"
-                      fontSize={32}
-                    >
-                      {totalFormatosCount}
-                    </text>
-                    <text
-                      x={cx}
-                      y={cy}
-                      dy={28}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[10px] uppercase tracking-wider"
-                    >
-                      Ofertas
+                    {/* SVG Center Text with tspan absolute offsets */}
+                    <text x={cx} y={cy} textAnchor='middle' dominantBaseline='central'>
+                      <tspan x={cx} y={cy - 8} fontSize='36' fontWeight='bold' fill={isDark ? '#FFFFFF' : '#111827'}>
+                        {totalFormatosCount}
+                      </tspan>
+                      <tspan x={cx} y={cy + 18} fontSize='12' fill='#888888'>
+                        TOTAL
+                      </tspan>
                     </text>
                   </PieChart>
                 </ResponsiveContainer>
@@ -569,26 +557,14 @@ export default function Dashboard() {
                       }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
-                    {/* SVG Center Text */}
-                    <text
-                      x={cx}
-                      y={cy}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-gray-900 dark:fill-white font-black"
-                      fontSize={32}
-                    >
-                      {totalNichosCount}
-                    </text>
-                    <text
-                      x={cx}
-                      y={cy}
-                      dy={28}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[10px] uppercase tracking-wider"
-                    >
-                      Total
+                    {/* SVG Center Text with tspan absolute offsets */}
+                    <text x={cx} y={cy} textAnchor='middle' dominantBaseline='central'>
+                      <tspan x={cx} y={cy - 8} fontSize='36' fontWeight='bold' fill={isDark ? '#FFFFFF' : '#111827'}>
+                        {totalNichosCount}
+                      </tspan>
+                      <tspan x={cx} y={cy + 18} fontSize='12' fill='#888888'>
+                        TOTAL
+                      </tspan>
                     </text>
                   </PieChart>
                 </ResponsiveContainer>
@@ -754,7 +730,7 @@ export default function Dashboard() {
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800 col-span-2 lg:col-span-1">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Idioma / Mercado</span>
-                  <span className="inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-850 text-gray-800 dark:text-gray-200 px-2.5 py-0.5 text-xs font-bold border border-gray-300 dark:border-gray-700">
+                  <span className="inline-flex items-center rounded-full bg-gray-200 dark:bg-gray-855 text-gray-800 dark:text-gray-200 px-2.5 py-0.5 text-xs font-bold border border-gray-300 dark:border-gray-700">
                     {ofertaSelecionada.idioma_mercado || 'BR'}
                   </span>
                 </div>
@@ -771,7 +747,7 @@ export default function Dashboard() {
                   <div className="flex flex-wrap gap-1">
                     {ofertaSelecionada.tags ? (
                       ofertaSelecionada.tags.split(',').map((tag, i) => (
-                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
+                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-855 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
                           {tag.trim()}
                         </span>
                       ))
@@ -814,7 +790,7 @@ export default function Dashboard() {
               </div>
 
               {/* Histórico de Edição */}
-              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
+              <div className="bg-gray-55 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
                 <p className="text-xs text-gray-555 dark:text-gray-400">
                   Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
