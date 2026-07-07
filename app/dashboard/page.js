@@ -616,7 +616,7 @@ const COLORS_NICHO = ['#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B', '#E
                         color: isDark ? '#F3F4F6' : '#1F2937'
                       }}
                     />
-                    <Legend iconType="circle" />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -664,7 +664,7 @@ const COLORS_NICHO = ['#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B', '#E
                         color: isDark ? '#F3F4F6' : '#1F2937'
                       }}
                     />
-                    <Legend iconType="circle" />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
