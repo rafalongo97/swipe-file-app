@@ -255,7 +255,7 @@ export default function Dashboard() {
 
   const renderOrderBumpsModal = (oferta) => {
     if (!oferta.nomes_order_bumps) {
-      return <p className="text-xs text-gray-500 italic mt-1">Nenhum order bump registrado para esta oferta.</p>;
+      return <p className="text-xs text-gray-550 dark:text-gray-400 italic mt-1">Nenhum order bump registrado para esta oferta.</p>;
     }
     try {
       const parsed = JSON.parse(oferta.nomes_order_bumps);
@@ -430,7 +430,7 @@ export default function Dashboard() {
           {/* Card 1: Total de Ofertas Escaladas */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md">
             <div>
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider block">
                 Total de Ofertas Escaladas
               </span>
               <span className="text-3xl font-black text-blue-600 dark:text-blue-500 mt-1 block">
@@ -475,12 +475,6 @@ export default function Dashboard() {
               Distribuição por Formato
             </h2>
             <div className="h-64 flex items-center justify-center relative">
-              {/* Central Value inside Donut */}
-              <div className="absolute flex flex-col items-center justify-center pointer-events-none z-0">
-                <span className="text-3xl font-black text-gray-900 dark:text-white">{totalFormatosCount}</span>
-                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-550 tracking-wider">Ofertas</span>
-              </div>
-              
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -488,8 +482,8 @@ export default function Dashboard() {
                       data={dataFormat}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={45}
+                      outerRadius={65}
                       paddingAngle={4}
                       dataKey="value"
                       labelLine={false}
@@ -508,6 +502,27 @@ export default function Dashboard() {
                       }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
+                    {/* SVG Center Text */}
+                    <text
+                      x="50%"
+                      y="50%"
+                      dy={-6}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-900 dark:fill-white font-black text-2xl"
+                    >
+                      {totalFormatosCount}
+                    </text>
+                    <text
+                      x="50%"
+                      y="50%"
+                      dy={14}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[9px] uppercase tracking-wider"
+                    >
+                      Ofertas
+                    </text>
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -523,12 +538,6 @@ export default function Dashboard() {
               Distribuição por Nicho
             </h2>
             <div className="h-64 flex items-center justify-center relative">
-              {/* Central Value inside Donut */}
-              <div className="absolute flex flex-col items-center justify-center pointer-events-none z-0">
-                <span className="text-3xl font-black text-gray-900 dark:text-white">{totalNichosCount}</span>
-                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-550 tracking-wider">Total</span>
-              </div>
-
               {mounted ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -536,8 +545,8 @@ export default function Dashboard() {
                       data={dataNiche}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={45}
+                      outerRadius={65}
                       paddingAngle={4}
                       dataKey="value"
                       labelLine={false}
@@ -556,6 +565,27 @@ export default function Dashboard() {
                       }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '25px' }} />
+                    {/* SVG Center Text */}
+                    <text
+                      x="50%"
+                      y="50%"
+                      dy={-6}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-900 dark:fill-white font-black text-2xl"
+                    >
+                      {totalNichosCount}
+                    </text>
+                    <text
+                      x="50%"
+                      y="50%"
+                      dy={14}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-400 dark:fill-gray-500 font-bold text-[9px] uppercase tracking-wider"
+                    >
+                      Total
+                    </text>
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -742,7 +772,7 @@ export default function Dashboard() {
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-gray-550 dark:text-gray-400 italic">Nenhuma tag registrada</span>
+                      <span className="text-xs text-gray-555 dark:text-gray-400 italic">Nenhuma tag registrada</span>
                     )}
                   </div>
                 </div>
@@ -770,16 +800,12 @@ export default function Dashboard() {
               {/* Notas de Modelagem Section */}
               <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Notas de Modelagem</span>
-                {ofertaSelecionada.notes_modelagem ? (
-                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium whitespace-pre-wrap leading-relaxed">
-                    {ofertaSelecionada.notes_modelagem}
-                  </p>
-                ) : ofertaSelecionada.notas_modelagem ? (
+                {ofertaSelecionada.notas_modelagem ? (
                   <p className="text-sm text-gray-700 dark:text-gray-300 font-medium whitespace-pre-wrap leading-relaxed">
                     {ofertaSelecionada.notas_modelagem}
                   </p>
                 ) : (
-                  <p className="text-xs text-gray-550 dark:text-gray-400 italic">Nenhuma nota registrada para esta oferta.</p>
+                  <p className="text-xs text-gray-555 dark:text-gray-400 italic">Nenhuma nota registrada para esta oferta.</p>
                 )}
               </div>
 
@@ -802,10 +828,43 @@ export default function Dashboard() {
             </div>
 
             {/* Footer with links */}
-            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 px-6 py-4 flex flex-wrap gap-2">
+            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 px-6 py-4 flex flex-col gap-3">
+              {/* Quick links line */}
+              <div className="flex flex-wrap gap-2 w-full">
+                {ofertaSelecionada.link_site && (
+                  <a 
+                    href={ofertaSelecionada.link_site}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    🔗 Ver Site / LP
+                  </a>
+                )}
+                {ofertaSelecionada.link_checkout && (
+                  <a 
+                    href={ofertaSelecionada.link_checkout}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    💳 Checkout Principal
+                  </a>
+                )}
+                {ofertaSelecionada.link_biblioteca_anuncios && (
+                  <a 
+                    href={ofertaSelecionada.link_biblioteca_anuncios}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
+                  >
+                    📢 Biblioteca de Anúncios
+                  </a>
+                )}
+              </div>
               <button
                 onClick={() => setOfertaSelecionada(null)}
-                className="flex-1 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer"
+                className="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 text-center font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer"
               >
                 Fechar Detalhes
               </button>
