@@ -1,5 +1,6 @@
 'use client';
 
+import Navbar from '../components/Navbar';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase, getRedirectUrl } from '../../lib/supabase';
@@ -192,120 +193,8 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors duration-300">
       
       {/* Top Navbar */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                Swipe<span className="text-blue-600">File</span>
-              </span>
-              <span className="bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs font-semibold px-2 py-0.5 rounded-full border border-red-100 dark:border-red-900/50">
-                ADMIN
-              </span>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-6">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                title={isDark ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-                aria-label="Alternar Tema"
-              >
-                {isDark ? '☀️' : '🌙'}
-              </button>
-              <Link href="/swipe" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Swipe File
-              </Link>
-              <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Acervo de Drive
-              </Link>
-              <button 
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
-                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition cursor-pointer"
-              >
-                Sair
-              </button>
-            </nav>
+      <Navbar activePage="admin-panel" isDark={isDark} toggleTheme={toggleTheme} />
 
-            {/* Hamburger Button (Mobile Only) */}
-            <div className="flex md:hidden items-center">
-              <button
-                type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 rounded-lg text-gray-500 hover:text-gray-750 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                aria-label="Abrir Menu"
-              >
-                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Drawer */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden flex justify-end">
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300"
-            onClick={() => setMenuOpen(false)}
-          ></div>
-          
-          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 transition-all duration-300 z-50">
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Menu</span>
-              <button 
-                onClick={() => setMenuOpen(false)}
-                className="text-gray-500 hover:text-gray-750 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <nav className="flex flex-col gap-6 flex-1">
-              <Link 
-                href="/swipe" 
-                onClick={() => setMenuOpen(false)}
-                className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
-              >
-                Swipe File
-              </Link>
-              <Link 
-                href="/acervo" 
-                onClick={() => setMenuOpen(false)}
-                className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition"
-              >
-                Acervo de Drive
-              </Link>
-              
-              <hr className="border-gray-200 dark:border-gray-800" />
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Tema</span>
-                <button
-                  type="button"
-                  onClick={() => { toggleTheme(); }}
-                  className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                  aria-label="Alternar Tema"
-                >
-                  {isDark ? '☀️' : '🌙'}
-                </button>
-              </div>
-
-              <button 
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }} 
-                className="w-full mt-auto bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-center text-sm"
-              >
-                Sair
-              </button>
-            </nav>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         <div className="mb-8">

@@ -3,18 +3,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import Navbar from '../components/Navbar';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
-// Color Palettes for Client
+// Color Palettes
 const COLORS_FORMAT = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#64748B'];
 const COLORS_NICHO = ['#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B', '#EF4444'];
 
-// Color Palettes for Admin
-const ADMIN_COLORS = ['#8B5CF6', '#F59E0B', '#10B981'];
-
-function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
-  const [isAdmin, setIsAdmin] = useState(isAdminEmail);
-  const [menuOpen, setMenuOpen] = useState(false);
+export default function ClientDashboardPage() {
+  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
   
   // Real Database Data States
@@ -27,6 +24,40 @@ function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
 
   useEffect(() => {
     setMounted(true);
+    const isDarkTheme = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDark(true);
+    }
+  };
+
+  useEffect(() => {
+    async function verificarAcesso() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login';
+        return;
+      }
+      const res = await fetch('/api/auth/check-status', {
+        headers: { 'Authorization': "Bearer " + session?.access_token }
+      });
+      const statusData = await res.json();
+      if (statusData && statusData.active === false) {
+        alert('Sua conta está inativa. Entre em contato com o suporte.');
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+      }
+    }
+    verificarAcesso();
   }, []);
 
   // Fetch real data from Supabase
@@ -254,133 +285,13 @@ function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
     );
   };
 
-﻿  if (carregando) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-550 dark:text-gray-400 font-medium">Carregando dados do painel...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Exact center coordinates for Donut charts
+﻿  // Exact center coordinates for Donut charts
   const cx = '50%';
   const cy = 100;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
-      {/* Top Navbar */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                Swipe<span className="text-blue-600">File</span>
-              </span>
-              <span className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/50">
-                PRO
-              </span>
-            </div>
-
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                title={isDark ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-                aria-label="Alternar Tema"
-              >
-                {isDark ? '☀️' : '🌙'}
-              </button>
-              <Link href="/dashboard" className="text-sm font-semibold text-blue-600 transition">
-                Dashboard
-              </Link>
-              <Link href="/swipe" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Swipe File
-              </Link>
-              <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Acervo de Drive
-              </Link>
-              <Link href="/configuracoes" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition">
-                Configurações
-              </Link>
-              {isAdmin && (
-                <Link href="/admin" className="text-sm font-semibold text-red-600 hover:text-red-700 transition">
-                  Painel Admin
-                </Link>
-              )}
-              <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-                className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline transition cursor-pointer"
-              >
-                Sair
-              </button>
-            </nav>
-
-            {/* Hamburger (Mobile) */}
-            <div className="flex md:hidden items-center">
-              <button
-                type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 rounded-lg text-gray-500 hover:text-gray-755 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                aria-label="Abrir Menu"
-              >
-                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Drawer */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden flex justify-end">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs" onClick={() => setMenuOpen(false)}></div>
-          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 z-50">
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Menu</span>
-              <button onClick={() => setMenuOpen(false)} className="text-gray-550 hover:text-gray-755 dark:text-gray-400 cursor-pointer">✕</button>
-            </div>
-            <nav className="flex flex-col gap-6 flex-1">
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-blue-600 transition">
-                Dashboard
-              </Link>
-              <Link href="/swipe" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
-                Swipe File
-              </Link>
-              <Link href="/acervo" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
-                Acervo de Drive
-              </Link>
-              <Link href="/configuracoes" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 transition">
-                Configurações
-              </Link>
-              {isAdmin && (
-                <Link href="/admin" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-red-600 hover:text-red-700 transition">
-                  Painel Admin
-                </Link>
-              )}
-              <hr className="border-gray-200 dark:border-gray-800" />
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Tema</span>
-                <button type="button" onClick={toggleTheme} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition cursor-pointer border border-gray-200 dark:border-gray-700">
-                  {isDark ? '☀️' : '🌙'}
-                </button>
-              </div>
-              <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-                className="w-full mt-auto bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 font-bold py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-center text-sm"
-              >
-                Sair
-              </button>
-            </nav>
-          </div>
-        </div>
-      )}
+      <Navbar activePage="dashboard" isDark={isDark} toggleTheme={toggleTheme} />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -540,7 +451,7 @@ function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
           </div>
         </div>
 
-        {/* Top 5 Table */}
+﻿        {/* Top 5 Table */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-gray-800">
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -755,7 +666,7 @@ function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
               </div>
 
               {/* Histórico de Edição */}
-              <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
+              <div className="bg-gray-55 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
                 <p className="text-xs text-gray-555 dark:text-gray-400">
                   Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
@@ -819,364 +730,4 @@ function ClientDashboard({ isDark, toggleTheme, isAdminEmail }) {
       )}
     </div>
   );
-}
-
-﻿function AdminDashboard({ isDark, toggleTheme, isAdminEmail }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // Mock data for Admin Dashboard
-  const totalOfertas = 142;
-  const totalDriveFiles = 87;
-  const totalUsers = 12;
-
-  const growthData = [
-    { name: 'Jan', ofertas: 20 },
-    { name: 'Fev', ofertas: 35 },
-    { name: 'Mar', ofertas: 60 },
-    { name: 'Abr', ofertas: 90 },
-    { name: 'Mai', ofertas: 120 },
-    { name: 'Jun', ofertas: 142 }
-  ];
-
-  const contributorsData = [
-    { name: 'Rafael', ofertas: 75 },
-    { name: 'Sócio', ofertas: 67 }
-  ];
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 flex flex-col transition-colors duration-300">
-      {/* Top Navbar with Admin styling (purple border bottom) */}
-      <header className="bg-white dark:bg-gray-900 border-b border-purple-500/40 sticky top-0 z-10 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                Swipe<span className="text-purple-600">File</span>
-              </span>
-              <span className="bg-purple-50 dark:bg-purple-950/40 text-purple-750 dark:text-purple-300 text-xs font-semibold px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-900/50 shadow-sm animate-pulse">
-                ADMIN 🛡️
-              </span>
-            </div>
-
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition duration-200 cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                title={isDark ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
-                aria-label="Alternar Tema"
-              >
-                {isDark ? '☀️' : '🌙'}
-              </button>
-              <Link href="/dashboard" className="text-sm font-semibold text-purple-600 transition">
-                Dashboard Admin
-              </Link>
-              <Link href="/swipe" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-purple-600 transition">
-                Swipe File
-              </Link>
-              <Link href="/acervo" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-purple-600 transition">
-                Acervo de Drive
-              </Link>
-              <Link href="/configuracoes" className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-purple-600 transition">
-                Configurações
-              </Link>
-              <Link href="/admin" className="text-sm font-semibold text-red-650 hover:text-red-700 transition">
-                Painel Admin
-              </Link>
-              <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-                className="text-sm font-semibold text-red-650 hover:text-red-700 hover:underline transition cursor-pointer"
-              >
-                Sair
-              </button>
-            </nav>
-
-            {/* Hamburger (Mobile) */}
-            <div className="flex md:hidden items-center">
-              <button
-                type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 rounded-lg text-gray-500 hover:text-gray-755 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition cursor-pointer flex items-center justify-center border border-gray-200 dark:border-gray-700"
-                aria-label="Abrir Menu"
-              >
-                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Drawer */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden flex justify-end">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs" onClick={() => setMenuOpen(false)}></div>
-          <div className="relative w-64 max-w-xs bg-white dark:bg-gray-900 h-full shadow-xl flex flex-col p-6 border-l border-gray-200 dark:border-gray-800 z-50">
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Admin Menu</span>
-              <button onClick={() => setMenuOpen(false)} className="text-gray-550 hover:text-gray-755 dark:text-gray-400 cursor-pointer">✕</button>
-            </div>
-            <nav className="flex flex-col gap-6 flex-1">
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-purple-600 transition">
-                Dashboard Admin
-              </Link>
-              <Link href="/swipe" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-purple-600 transition">
-                Swipe File
-              </Link>
-              <Link href="/acervo" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-purple-600 transition">
-                Acervo de Drive
-              </Link>
-              <Link href="/configuracoes" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-gray-700 dark:text-gray-200 hover:text-purple-600 transition">
-                Configurações
-              </Link>
-              <Link href="/admin" onClick={() => setMenuOpen(false)} className="text-base font-semibold text-red-650 hover:text-red-700 transition">
-                Painel Admin
-              </Link>
-              <hr className="border-gray-200 dark:border-gray-800" />
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Tema</span>
-                <button type="button" onClick={toggleTheme} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition cursor-pointer border border-gray-200 dark:border-gray-700">
-                  {isDark ? '☀️' : '🌙'}
-                </button>
-              </div>
-              <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-                className="w-full mt-auto bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 font-bold py-2.5 px-4 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-center text-sm"
-              >
-                Sair
-              </button>
-            </nav>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-950 dark:text-white">
-              Dashboard Administrativo 🛡️
-            </h1>
-            <p className="text-sm text-gray-550 dark:text-gray-400 mt-1">
-              Visualização privilegiada das métricas operacionais do portfólio.
-            </p>
-          </div>
-        </div>
-
-        {/* Top Summary Cards with Admin styling (purple/gold accents) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          {/* Card 1: Total de Ofertas */}
-          <div className="bg-white dark:bg-gray-900 border border-purple-500/20 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md hover:border-purple-500/40">
-            <div>
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider block">
-                Total de Ofertas
-              </span>
-              <span className="text-3xl font-black text-purple-600 dark:text-purple-550 mt-1 block">
-                {totalOfertas}
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span>
-                Visão Geral
-              </span>
-            </div>
-            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-950/50 rounded-xl flex items-center justify-center text-2xl text-purple-600 dark:text-purple-400">
-              🚀
-            </div>
-          </div>
-
-          {/* Card 2: Arquivos no Drive */}
-          <div className="bg-white dark:bg-gray-900 border border-amber-500/20 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md hover:border-amber-500/40">
-            <div>
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider block">
-                Arquivos no Drive
-              </span>
-              <span className="text-3xl font-black text-amber-600 dark:text-amber-500 mt-1 block">
-                {totalDriveFiles}
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                Links de Mídia
-              </span>
-            </div>
-            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/50 rounded-xl flex items-center justify-center text-2xl text-amber-600 dark:text-amber-400">
-              📂
-            </div>
-          </div>
-
-          {/* Card 3: Usuários Cadastrados */}
-          <div className="bg-white dark:bg-gray-900 border border-purple-500/20 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md hover:border-purple-500/40">
-            <div>
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider block">
-                Usuários Cadastrados
-              </span>
-              <span className="text-3xl font-black text-purple-600 dark:text-purple-550 mt-1 block">
-                {totalUsers}
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span>
-                Controle de Perfis
-              </span>
-            </div>
-            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-950/50 rounded-xl flex items-center justify-center text-2xl text-purple-600 dark:text-purple-400">
-              👥
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Chart 1: Evolução / Velocidade de Crescimento (LineChart) */}
-          <div className="bg-white dark:bg-gray-900 border border-purple-500/10 rounded-2xl p-6 shadow-xs flex flex-col">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 block"></span>
-              Velocidade de Crescimento
-            </h2>
-            <div className="h-72">
-              {mounted ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={growthData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-                    <CartesianGrid stroke={isDark ? '#374151' : '#E5E7EB'} strokeDasharray="3 3" />
-                    <XAxis dataKey="name" stroke={isDark ? '#9CA3AF' : '#4B5563'} fontSize={12} />
-                    <YAxis stroke={isDark ? '#9CA3AF' : '#4B5563'} fontSize={12} />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-                        borderColor: isDark ? '#374151' : '#E5E7EB',
-                        borderRadius: '8px',
-                        color: isDark ? '#F3F4F6' : '#1F2937'
-                      }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="ofertas" stroke="#8B5CF6" strokeWidth={3} activeDot={{ r: 8 }} name="Ofertas Cadastradas" />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-gray-400 animate-pulse text-sm">Carregando gráfico...</div>
-              )}
-            </div>
-          </div>
-
-          {/* Chart 2: Produtividade / Top Contribuidores (BarChart) */}
-          <div className="bg-white dark:bg-gray-900 border border-purple-500/10 rounded-2xl p-6 shadow-xs flex flex-col">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 block"></span>
-              Top Contribuidores
-            </h2>
-            <div className="h-72">
-              {mounted ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={contributorsData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-                    <CartesianGrid stroke={isDark ? '#374151' : '#E5E7EB'} strokeDasharray="3 3" />
-                    <XAxis dataKey="name" stroke={isDark ? '#9CA3AF' : '#4B5563'} fontSize={12} />
-                    <YAxis stroke={isDark ? '#9CA3AF' : '#4B5563'} fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-                        borderColor: isDark ? '#374151' : '#E5E7EB',
-                        borderRadius: '8px',
-                        color: isDark ? '#F3F4F6' : '#1F2937'
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="ofertas" fill="#F59E0B" radius={[6, 6, 0, 0]} name="Ofertas Adicionadas" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-gray-400 animate-pulse text-sm">Carregando gráfico...</div>
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-// MAIN DEFAULT EXPORT (Gatekeeper)
-export default function Dashboard() {
-  const [carregando, setCarregando] = useState(true);
-  const [isDark, setIsDark] = useState(false);
-  const [isAdminEmail, setIsAdminEmail] = useState(false);
-  const [isAdminProfile, setIsAdminProfile] = useState(false);
-
-  useEffect(() => {
-    const isDarkTheme = document.documentElement.classList.contains('dark');
-    setIsDark(isDarkTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
-
-  useEffect(() => {
-    async function verificarAcesso() {
-      setCarregando(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = '/login';
-        return;
-      }
-      
-      if (session.user.email === 'rafael.longo97@gmail.com') {
-        setIsAdminEmail(true);
-      }
-
-      // Fetch user profile to check is_admin column in profiles
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', session.user.id)
-        .single();
-
-      if (!error && profile && profile.is_admin === true) {
-        setIsAdminProfile(true);
-      }
-
-      const res = await fetch('/api/auth/check-status', {
-        headers: { 'Authorization': "Bearer " + session?.access_token }
-      });
-      const statusData = await res.json();
-      if (statusData && statusData.active === false) {
-        alert('Sua conta está inativa. Entre em contato com o suporte.');
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return;
-      }
-      setCarregando(false);
-    }
-    verificarAcesso();
-  }, []);
-
-  if (carregando) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-550 dark:text-gray-400 font-medium font-sans">Carregando painel de controle...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAdminProfile) {
-    return <AdminDashboard isDark={isDark} toggleTheme={toggleTheme} isAdminEmail={isAdminEmail} />;
-  }
-
-  return <ClientDashboard isDark={isDark} toggleTheme={toggleTheme} isAdminEmail={isAdminEmail} />;
 }
