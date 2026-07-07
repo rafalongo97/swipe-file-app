@@ -60,7 +60,8 @@ export default function Home() {
     notas_modelagem: '',
     esta_escalada: false,
     tipo_oferta: ['DR'],
-    idioma_mercado: 'BR'
+    idioma_mercado: 'BR',
+    oculta_para_membros: false
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -77,6 +78,14 @@ export default function Home() {
       }
 
       if (session.user.email === 'rafael.longo97@gmail.com') {
+        setIsAdmin(true);
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', session.user.id)
+        .single();
+      if (profile && profile.is_admin === true) {
         setIsAdmin(true);
       }
 
@@ -155,7 +164,8 @@ export default function Home() {
             notas_modelagem: data.notas_modelagem || '',
             esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false,
             tipo_oferta: arrayTipoOferta,
-            idioma_mercado: data.idioma_mercado || 'BR'
+            idioma_mercado: data.idioma_mercado || 'BR',
+            oculta_para_membros: data.oculta_para_membros !== undefined ? data.oculta_para_membros : false
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -393,6 +403,7 @@ export default function Home() {
 
     const payload = {
       ...cleanFormData,
+      oculta_para_membros: isAdmin ? (cleanFormData.oculta_para_membros || false) : false,
       tipo_funil: tipoFunilCalculado,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
@@ -698,6 +709,24 @@ export default function Home() {
                       </span>
                     </label>
                   </div>
+
+                  {isAdmin && (
+                    <div className="flex items-center h-full">
+                      <label className="relative flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          name="oculta_para_membros" 
+                          checked={formData.oculta_para_membros || false} 
+                          onChange={handleChange} 
+                          className="sr-only peer" 
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <span className="ml-3 text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                          Ocultar oferta para membros comuns <span className="text-purple-600">(Admin apenas)</span>
+                        </span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

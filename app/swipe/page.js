@@ -670,6 +670,11 @@ export default function Dashboard() {
                           {oferta.esta_escalada && (
                             <span className="ml-1.5 text-sm" title="Oferta Escalada">🚀</span>
                           )}
+                          {oferta.oculta_para_membros === true && (
+                            <span className="inline-flex items-center gap-1 bg-zinc-800 text-zinc-350 text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 shadow-sm" title="Visível apenas para admins">
+                              🔒 Privada
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-gray-500 mt-1 pl-7 flex items-center gap-1.5">
                           <span>Criado por: <span className="font-semibold text-gray-700 dark:text-gray-300">{oferta.profiles?.nome || 'Desconhecido'}</span></span>
@@ -726,8 +731,13 @@ export default function Dashboard() {
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 leading-snug">
+                <h3 className="text-xl font-bold text-gray-900 leading-snug flex items-center gap-2">
                   {ofertaSelecionada.nome_produto}
+                  {ofertaSelecionada.oculta_para_membros === true && (
+                    <span className="inline-flex items-center gap-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 shadow-sm">
+                      🔒 Privada
+                    </span>
+                  )}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">Detalhes completos do Swipe File</p>
               </div>
