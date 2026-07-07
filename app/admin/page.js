@@ -1,20 +1,19 @@
-'use client';
+﻿'use client';
 
-import Navbar from '../components/Navbar';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase, getRedirectUrl } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
+import Navbar from '../components/Navbar';
 
-export default function Admin() {
+export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [carregandoAuth, setCarregandoAuth] = useState(true);
   const [profiles, setProfiles] = useState([]);
   const [carregandoDados, setCarregandoDados] = useState(true);
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
   const [isDark, setIsDark] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
-  // States para o Popup de Ações
+  // Modal actions states
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
   const [novaSenha, setNovaSenha] = useState('');
   const [salvandoSenha, setSalvandoSenha] = useState(false);
@@ -48,8 +47,15 @@ export default function Admin() {
         return;
       }
 
-      if (session.user.email !== 'rafael.longo97@gmail.com') {
-        alert('Acesso negado: Rota exclusiva para o administrador.');
+      // Check if user is Rafael or is_admin profile
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', session.user.id)
+        .single();
+
+      if (session.user.email !== 'rafael.longo97@gmail.com' && (!profile || profile.is_admin !== true)) {
+        alert('Acesso negado: Rota exclusiva para administradores.');
         window.location.href = '/swipe';
         return;
       }
@@ -77,7 +83,38 @@ export default function Admin() {
     setCarregandoDados(false);
   }
 
-  const handleToggleAcesso = async (profileId, statusAcessoAtual) => {
+  const handleToggleRole = async (profileId, isCurrentlyAdmin, isMaster) => {
+    if (isMaster) {
+      alert('Ação negada: O usuário Master é intocável');
+      return;
+    }
+    setMensagem({ type: '', text: '' });
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: !isCurrentlyAdmin })
+        .eq('id', profileId);
+
+      if (error) {
+        alert('Erro ao alterar cargo: ' + error.message);
+        return;
+      }
+
+      setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, is_admin: !isCurrentlyAdmin } : p));
+      if (usuarioSelecionado && usuarioSelecionado.id === profileId) {
+        setUsuarioSelecionado(prev => prev ? { ...prev, is_admin: !isCurrentlyAdmin } : prev);
+      }
+      setMensagem({ type: 'success', text: 'Cargo do usuário atualizado com sucesso!' });
+    } catch (err) {
+      alert('Erro inesperado: ' + err.message);
+    }
+  };
+
+  const handleToggleAcesso = async (profileId, statusAcessoAtual, isMaster) => {
+    if (isMaster) {
+      alert('Ação negada: O usuário Master é intocável');
+      return;
+    }
     setMensagem({ type: '', text: '' });
     try {
       const novoStatus = !statusAcessoAtual;
@@ -87,26 +124,25 @@ export default function Admin() {
         .eq('id', profileId);
 
       if (error) {
-        console.error('Erro retornado pelo Supabase no bloqueio:', error);
         alert('Erro ao alterar status de acesso: ' + error.message);
         return;
       }
 
-      // Atualiza o estado local de perfis para atualizar a tabela instantaneamente
       setProfiles(prev => prev.map(p => p.id === profileId ? { ...p, status_acesso: novoStatus } : p));
-      
-      // Atualiza o estado local do usuário selecionado para atualizar o modal instantaneamente
       setUsuarioSelecionado(prev => prev && prev.id === profileId ? { ...prev, status_acesso: novoStatus } : prev);
-      
+      setMensagem({ type: 'success', text: 'Status de acesso atualizado com sucesso!' });
     } catch (err) {
-      console.error('Erro capturado no try/catch da função de bloqueio:', err);
-      alert('Erro inesperado ao alterar acesso. Verifique o console.');
+      alert('Erro inesperado: ' + err.message);
     }
   };
 
   const handleAlterarSenhaAdmin = async (e) => {
     e?.preventDefault();
     if (!usuarioSelecionado) return;
+    if (usuarioSelecionado.is_master) {
+      alert('Ação negada: O usuário Master é intocável');
+      return;
+    }
     if (novaSenha.length < 6) {
       alert('A senha deve conter no mínimo 6 caracteres.');
       return;
@@ -126,10 +162,10 @@ export default function Admin() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Erro desconhecido ao alterar senha');
+        throw new Error(data.error || 'Erro ao alterar senha');
       }
 
-      alert('Senha updated com sucesso! 🚀');
+      alert('Senha alterada com sucesso! 🔑');
       setNovaSenha('');
     } catch (err) {
       alert(`Erro: ${err.message}`);
@@ -140,6 +176,10 @@ export default function Admin() {
 
   const handleConfirmExcluirAdmin = async () => {
     if (!usuarioSelecionado) return;
+    if (usuarioSelecionado.is_master) {
+      alert('Ação negada: O usuário Master é intocável');
+      return;
+    }
     if (confirmDeleteInput !== 'excluir') {
       alert("Por favor, digite 'excluir' para confirmar.");
       return;
@@ -159,7 +199,7 @@ export default function Admin() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Erro desconhecido ao excluir usuário');
+        throw new Error(data.error || 'Erro ao excluir usuário');
       }
 
       alert('Usuário excluído com sucesso!');
@@ -179,7 +219,7 @@ export default function Admin() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Autenticando Administrador...</p>
+          <p className="text-gray-550 dark:text-gray-400 font-medium">Autenticando Administrador...</p>
         </div>
       </div>
     );
@@ -190,39 +230,36 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors duration-300">
-      
-      {/* Top Navbar */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-955 flex flex-col transition-colors duration-300">
       <Navbar activePage="admin-panel" isDark={isDark} toggleTheme={toggleTheme} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-gray-955 dark:text-white tracking-tight">Painel Administrativo 🛡️</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Gerencie as contas dos usuários do sistema e defina permissões de acesso.</p>
+          <p className="text-sm text-gray-550 dark:text-gray-450 mt-1">Gerencie as contas dos usuários do sistema, alterne cargos e defina permissões de acesso.</p>
         </div>
 
         {mensagem.text && (
           <div className={`p-4 rounded-lg mb-6 border text-sm font-semibold ${
             mensagem.type === 'success' 
-              ? 'bg-green-50 text-green-800 border-green-200 dark:bg-green-950/20 dark:text-green-300 dark:border-green-900/50' 
-              : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-950/20 dark:text-red-300 dark:border-red-900/50'
+              ? 'bg-green-50 text-green-800 border-green-200 dark:bg-green-955/20 dark:text-green-300 dark:border-green-900/50' 
+              : 'bg-red-50 text-red-800 border-red-200 dark:bg-red-955/20 dark:text-red-300 dark:border-red-900/50'
           }`}>
             {mensagem.text}
           </div>
         )}
 
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/10">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Usuários Cadastrados</h2>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold">{profiles.length} usuários</span>
+            <span className="text-xs text-gray-550 dark:text-gray-450 font-bold bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">{profiles.length} usuários</span>
           </div>
 
           <div className="overflow-x-auto">
             {carregandoDados ? (
               <div className="p-12 text-center flex flex-col justify-center items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-500 dark:text-gray-400 font-medium">Buscando perfis...</p>
+                <p className="text-gray-550 dark:text-gray-450 font-medium">Buscando perfis...</p>
               </div>
             ) : profiles.length === 0 ? (
               <div className="p-12 text-center max-w-md mx-auto">
@@ -231,25 +268,41 @@ export default function Admin() {
               </div>
             ) : (
               <table className="min-w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-gray-50 dark:bg-gray-800/40 border-b border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300">
+                <thead className="bg-gray-50 dark:bg-gray-800/40 border-b border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold uppercase tracking-wider">
                   <tr>
-                    <th className="p-4 font-bold text-xs uppercase tracking-wider">Nome</th>
-                    <th className="p-4 font-bold text-xs uppercase tracking-wider">E-mail</th>
-                    <th className="p-4 font-bold text-xs uppercase tracking-wider">Status</th>
+                    <th className="p-4">Nome</th>
+                    <th className="p-4">E-mail</th>
+                    <th className="p-4">Cargo</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-center">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                <tbody className="divide-y divide-gray-105 dark:divide-gray-800/70">
                   {profiles.map((profile) => (
                     <tr 
-                      key={profile.id} 
-                      onClick={() => setUsuarioSelecionado(profile)}
-                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150 cursor-pointer"
+                      key={profile.id}
+                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition duration-150"
                     >
                       <td className="p-4 font-semibold text-gray-900 dark:text-white">
                         {profile.nome || 'Sem nome'}
                       </td>
                       <td className="p-4 text-gray-700 dark:text-gray-300">
                         {profile.email}
+                      </td>
+                      <td className="p-4">
+                        {profile.is_master ? (
+                          <span className="inline-flex items-center rounded-full bg-purple-100 text-purple-800 dark:bg-purple-955/40 dark:text-purple-300 px-3 py-1 text-xs font-bold border border-purple-200 dark:border-purple-900/50 shadow-sm animate-pulse">
+                            👑 Proprietário
+                          </span>
+                        ) : profile.is_admin ? (
+                          <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-955/40 dark:text-amber-350 px-3 py-1 text-xs font-bold border border-amber-200 dark:border-amber-900/50">
+                            🛡️ Admin
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-800 dark:bg-blue-955/40 dark:text-blue-305 px-3 py-1 text-xs font-bold border border-blue-200 dark:border-blue-900/50">
+                            👥 Membro
+                          </span>
+                        )}
                       </td>
                       <td className="p-4">
                         {profile.status_acesso !== false ? (
@@ -262,6 +315,51 @@ export default function Admin() {
                           </span>
                         )}
                       </td>
+                      <td className="p-4 text-center">
+                        {profile.is_master ? (
+                          <span className="inline-flex items-center rounded-full bg-purple-50 text-purple-750 dark:bg-purple-955/20 dark:text-purple-400 px-3 py-1 text-xs font-bold border border-purple-150 dark:border-purple-900/40">
+                            Master
+                          </span>
+                        ) : (
+                          <div className="flex justify-center items-center gap-2">
+                            {/* Toggle Admin Button */}
+                            {profile.is_admin ? (
+                              <button
+                                onClick={() => handleToggleRole(profile.id, true, false)}
+                                className="bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-955/20 dark:text-amber-400 font-bold px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-900/50 text-xs transition cursor-pointer"
+                              >
+                                Remover Admin
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleToggleRole(profile.id, false, false)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition cursor-pointer"
+                              >
+                                Tornar Admin
+                              </button>
+                            )}
+
+                            {/* More Actions / Change password */}
+                            <button
+                              onClick={() => setUsuarioSelecionado(profile)}
+                              className="bg-gray-100 hover:bg-gray-250 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs transition cursor-pointer"
+                            >
+                              Editar / Senha
+                            </button>
+
+                            {/* Delete User Button */}
+                            <button
+                              onClick={() => {
+                                setUsuarioSelecionado(profile);
+                                setShowDeleteConfirm(true);
+                              }}
+                              className="bg-red-50 hover:bg-red-105 dark:bg-red-955/20 text-red-650 dark:text-red-400 font-bold px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 text-xs transition cursor-pointer"
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -269,7 +367,6 @@ export default function Admin() {
             )}
           </div>
         </div>
-
       </main>
 
       {/* POPUP DE AÇÕES DO USUÁRIO */}
@@ -293,7 +390,7 @@ export default function Admin() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
                   Ações do Usuário
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">Gerencie a conta selecionada</p>
+                <p className="text-xs text-gray-550 dark:text-zinc-400 mt-1">Gerencie a conta selecionada</p>
               </div>
               <button 
                 onClick={() => {
@@ -302,7 +399,7 @@ export default function Admin() {
                   setConfirmDeleteInput('');
                   setNovaSenha('');
                 }}
-                className="text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 bg-gray-200/50 dark:bg-zinc-800 p-2 rounded-full transition cursor-pointer"
+                className="text-gray-400 hover:text-gray-650 dark:text-zinc-500 dark:hover:text-zinc-350 bg-gray-200/50 dark:bg-zinc-800 p-2 rounded-full transition cursor-pointer"
                 aria-label="Fechar"
               >
                 ✕
@@ -312,12 +409,28 @@ export default function Admin() {
             {/* Content */}
             <div className="overflow-y-auto p-6 space-y-6">
               {/* Informações */}
-              <div className="bg-gray-50 dark:bg-zinc-800/30 p-4 rounded-xl border border-gray-100 dark:border-zinc-800/80 space-y-2">
+              <div className="bg-gray-50 dark:bg-zinc-800/30 p-4 rounded-xl border border-gray-100 dark:border-zinc-800/80 space-y-2 text-left">
                 <p className="text-sm text-gray-700 dark:text-zinc-300">
                   <strong>Nome:</strong> {usuarioSelecionado.nome || 'Sem nome'}
                 </p>
                 <p className="text-sm text-gray-700 dark:text-zinc-300">
                   <strong>E-mail:</strong> {usuarioSelecionado.email}
+                </p>
+                <p className="text-sm text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
+                  <strong>Cargo atual:</strong>
+                  {usuarioSelecionado.is_master ? (
+                    <span className="inline-flex items-center rounded-full bg-purple-100 text-purple-800 dark:bg-purple-955/40 dark:text-purple-300 px-2.5 py-0.5 text-xs font-bold border border-purple-100 dark:border-purple-900/50">
+                      Master
+                    </span>
+                  ) : usuarioSelecionado.is_admin ? (
+                    <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-955/40 dark:text-amber-300 px-2.5 py-0.5 text-xs font-bold border border-amber-100 dark:border-amber-900/50">
+                      Admin
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-blue-105 text-blue-800 dark:bg-blue-955/40 dark:text-blue-300 px-2.5 py-0.5 text-xs font-bold border border-blue-105 dark:border-blue-900/50">
+                      Membro
+                    </span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-700 dark:text-zinc-300 flex items-center gap-1.5">
                   <strong>Status:</strong>
@@ -335,21 +448,28 @@ export default function Admin() {
 
               {/* Botão de Toggle Status */}
               <div>
-                <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Controle de Acesso</h4>
+                <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2 text-left">Controle de Acesso</h4>
                 <button
-                  onClick={() => handleToggleAcesso(usuarioSelecionado.id, usuarioSelecionado.status_acesso !== false)}
-                  className={`w-full text-sm font-bold py-2.5 px-4 rounded-lg border transition cursor-pointer flex justify-center items-center gap-1.5 ${
-                    usuarioSelecionado.status_acesso !== false
-                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-950/20 dark:border-amber-900/50 dark:text-amber-400'
-                      : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:bg-green-950/20 dark:border-green-900/50 dark:text-green-400'
+                  onClick={() => handleToggleAcesso(usuarioSelecionado.id, usuarioSelecionado.status_acesso !== false, usuarioSelecionado.is_master)}
+                  disabled={usuarioSelecionado.is_master}
+                  className={`w-full text-sm font-bold py-2.5 px-4 rounded-lg border transition flex justify-center items-center gap-1.5 ${
+                    usuarioSelecionado.is_master
+                      ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-500'
+                      : usuarioSelecionado.status_acesso !== false
+                      ? 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 dark:bg-amber-955/20 dark:border-amber-900/50 dark:text-amber-400 cursor-pointer'
+                      : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700 dark:bg-amber-955/20 dark:border-amber-900/50 dark:text-green-400 cursor-pointer'
                   }`}
                 >
-                  {usuarioSelecionado.status_acesso !== false ? '🚫 Bloquear Acesso' : '✅ Desbloquear Acesso'}
+                  {usuarioSelecionado.is_master 
+                    ? '🔒 Conta Proprietária Protegida'
+                    : usuarioSelecionado.status_acesso !== false 
+                    ? '🚫 Bloquear Acesso' 
+                    : '✅ Desbloquear Acesso'}
                 </button>
               </div>
 
               {/* Formulário Alterar Senha */}
-              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4">
+              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4 text-left">
                 <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Alterar Senha</h4>
                 <div className="space-y-3">
                   <div className="relative">
@@ -357,33 +477,36 @@ export default function Admin() {
                       type={showPassword ? "text" : "password"}
                       value={novaSenha}
                       onChange={(e) => setNovaSenha(e.target.value)}
-                      placeholder="Defina a nova senha"
+                      placeholder={usuarioSelecionado.is_master ? "Senha do Master é inalterável" : "Defina a nova senha"}
                       required
+                      disabled={usuarioSelecionado.is_master}
                       autoComplete="new-password"
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition disabled:opacity-50"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition cursor-pointer"
-                      title={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    >
-                      {showPassword ? (
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </svg>
-                      ) : (
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
+                    {!usuarioSelecionado.is_master && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition cursor-pointer"
+                        title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      >
+                        {showPassword ? (
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        ) : (
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
                   </div>
                   <button
                     type="button"
                     onClick={handleAlterarSenhaAdmin}
-                    disabled={salvandoSenha}
+                    disabled={salvandoSenha || usuarioSelecionado.is_master}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition disabled:opacity-50 text-sm cursor-pointer"
                   >
                     {salvandoSenha ? 'Alterando...' : 'Salvar Nova Senha'}
@@ -392,20 +515,20 @@ export default function Admin() {
               </div>
 
               {/* Botão de Exclusão */}
-              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4">
+              <div className="border-t border-gray-150 dark:border-zinc-800 pt-4 text-left">
                 <h4 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Excluir Conta</h4>
                 
-                {!showDeleteConfirm ? (
+                {usuarioSelecionado.is_master ? (
+                  <p className="text-xs text-gray-500 dark:text-zinc-550 italic">O proprietário Master é intocável e não pode ser removido.</p>
+                ) : !showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    disabled={usuarioSelecionado.email === 'rafael.longo97@gmail.com'}
-                    className="w-full bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-2 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={usuarioSelecionado.email === 'rafael.longo97@gmail.com' ? "Não é possível excluir o administrador" : "Excluir Usuário"}
+                    className="w-full bg-red-50 hover:bg-red-105 dark:bg-red-955/20 text-red-650 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold py-2 rounded-lg border border-red-200 dark:border-red-900/50 transition cursor-pointer text-sm"
                   >
                     🗑️ Excluir Usuário
                   </button>
                 ) : (
-                  <div className="space-y-3 bg-red-50/50 dark:bg-red-950/10 p-3 rounded-lg border border-red-100 dark:border-red-950/30">
+                  <div className="space-y-3 bg-red-50/50 dark:bg-red-955/10 p-3 rounded-lg border border-red-100 dark:border-red-950/30">
                     <p className="text-xs font-semibold text-red-700 dark:text-red-400">
                       Esta ação é irreversível! Digite <strong>excluir</strong> abaixo para confirmar:
                     </p>
@@ -438,7 +561,6 @@ export default function Admin() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

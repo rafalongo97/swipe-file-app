@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+﻿import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
@@ -41,6 +41,21 @@ export async function POST(request) {
         }
       }
     );
+
+    // Fetch profile of the user to be deleted to check is_master status
+    const { data: targetProfile, error: getProfileError } = await supabaseAdmin
+      .from('profiles')
+      .select('is_master')
+      .eq('id', userId)
+      .single();
+
+    if (getProfileError) {
+      return NextResponse.json({ error: `Erro ao buscar dados do perfil: ${getProfileError.message}` }, { status: 400 });
+    }
+
+    if (targetProfile && targetProfile.is_master === true) {
+      return NextResponse.json({ error: "Ação negada: O usuário Master é intocável" }, { status: 403 });
+    }
 
     // 1. Exclui o usuário da tabela profiles
     const { error: profileErr } = await supabaseAdmin
