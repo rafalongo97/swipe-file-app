@@ -76,10 +76,6 @@ export default function Home() {
         window.location.href = '/login'; // Expulsa para o login se não tiver sessão
         return;
       }
-
-      if (session.user.email === 'rafael.longo97@gmail.com') {
-        setIsAdmin(true);
-      }
       const { data: profile } = await supabase
         .from('profiles')
         .select('is_admin')
@@ -403,7 +399,7 @@ export default function Home() {
 
     const payload = {
       ...cleanFormData,
-      oculta_para_membros: cleanFormData.oculta_para_membros || false,
+      oculta_para_membros: isAdmin ? (cleanFormData.oculta_para_membros || false) : false,
       tipo_funil: tipoFunilCalculado,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
@@ -923,21 +919,23 @@ export default function Home() {
             {/* Actions */}
             <div className="pt-6 border-t border-gray-100 flex flex-col gap-4">
               {/* Toggle Ocultar Oferta */}
-              <div className="flex items-center">
-                <label className="relative flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    name="oculta_para_membros" 
-                    checked={formData?.oculta_para_membros || false} 
-                    onChange={handleChange} 
-                    className="sr-only peer" 
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                  <span className="ml-3 text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-                    🔒 Ocultar oferta para membros comuns
-                  </span>
-                </label>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center">
+                  <label className="relative flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      name="oculta_para_membros" 
+                      checked={formData?.oculta_para_membros || false} 
+                      onChange={handleChange} 
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <span className="ml-3 text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                      🔒 Ocultar oferta para membros comuns
+                    </span>
+                  </label>
+                </div>
+              )}
               
             <div className="flex flex-col sm:flex-row gap-4 w-full">
               <button 
