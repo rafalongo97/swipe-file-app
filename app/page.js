@@ -61,7 +61,8 @@ export default function Home() {
     esta_escalada: false,
     tipo_oferta: ['DR'],
     idioma_mercado: 'BR',
-    oculta_para_membros: false
+    oculta_para_membros: false,
+    qtd_criativos_ativos: 0
   });
   const [orderBumps, setOrderBumps] = useState([]); // [{ nome: '', valor: '' }]
   const [mensagem, setMensagem] = useState({ type: '', text: '' });
@@ -161,7 +162,8 @@ export default function Home() {
             esta_escalada: data.esta_escalada !== undefined ? data.esta_escalada : false,
             tipo_oferta: arrayTipoOferta,
             idioma_mercado: data.idioma_mercado || 'BR',
-            oculta_para_membros: data.oculta_para_membros !== undefined ? data.oculta_para_membros : false
+            oculta_para_membros: data.oculta_para_membros !== undefined ? data.oculta_para_membros : false,
+            qtd_criativos_ativos: data.qtd_criativos_ativos !== null && data.qtd_criativos_ativos !== undefined ? data.qtd_criativos_ativos : 0
           });
 
           // Reconstrói o array de order bumps a partir do campo nomes_order_bumps
@@ -400,6 +402,7 @@ export default function Home() {
     const payload = {
       ...cleanFormData,
       oculta_para_membros: isAdmin ? (cleanFormData.oculta_para_membros || false) : false,
+      qtd_criativos_ativos: parseInt(formData.qtd_criativos_ativos, 10) || 0,
       tipo_funil: tipoFunilCalculado,
       valor_front: sanitizeNumber(formData.valor_front),
       qtd_order_bump: sanitizeInt(formData.qtd_order_bump),
@@ -673,6 +676,19 @@ export default function Home() {
                     <option value="Francês">Francês</option>
                     <option value="Italiano">Italiano</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">QTD. DE CRIATIVOS ATIVOS</label>
+                  <input 
+                    type="number" 
+                    name="qtd_criativos_ativos" 
+                    value={formData.qtd_criativos_ativos} 
+                    onChange={handleChange} 
+                    min="0"
+                    placeholder="Ex: 5"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition shadow-sm font-medium" 
+                  />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-6 pt-4 pl-1 col-span-1 md:col-span-2">

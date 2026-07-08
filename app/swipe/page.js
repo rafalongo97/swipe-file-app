@@ -696,9 +696,14 @@ export default function Dashboard() {
                             </span>
                           )}
                         </div>
-                        {oferta.tags && (
-                          <div className="flex flex-wrap gap-1 mt-1 pl-7">
-                            {oferta.tags.split(',').map((tag, i) => (
+                        {(oferta.tags || (oferta.qtd_criativos_ativos !== undefined && oferta.qtd_criativos_ativos !== null)) && (
+                          <div className="flex flex-wrap gap-1.5 mt-1 pl-7 items-center">
+                            {oferta.qtd_criativos_ativos !== undefined && oferta.qtd_criativos_ativos !== null && (
+                              <span className="text-[10px] bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded font-bold border border-blue-200/50 dark:border-blue-900/30">
+                                🖼️ {oferta.qtd_criativos_ativos} Criativos Ativos
+                              </span>
+                            )}
+                            {oferta.tags && oferta.tags.split(',').map((tag, i) => (
                               <span key={i} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
                                 {tag.trim()}
                               </span>
@@ -755,6 +760,11 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-3">
                 {renderTipoOfertaBadges(ofertaSelecionada)}
+                {ofertaSelecionada.qtd_criativos_ativos !== undefined && ofertaSelecionada.qtd_criativos_ativos !== null && (
+                  <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 px-3 py-1 text-xs font-bold border border-blue-200/50 dark:border-blue-900/30">
+                    🖼️ {ofertaSelecionada.qtd_criativos_ativos} Criativos Ativos
+                  </span>
+                )}
                 {ofertaSelecionada.status_ativo ? (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
