@@ -9,6 +9,8 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [nome, setNome] = useState('');
+  const [revisoesPendentes, setRevisoesPendentes] = useState([]);
+  const [painelOpen, setPainelOpen] = useState(false);
   const [email, setEmail] = useState('');
 
   useEffect(() => {
@@ -22,8 +24,12 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
           .eq('id', session.user.id)
           .single();
         if (!error && data) {
-          setIsAdmin(data.is_admin === true);
+          const adminCheck = data.is_admin === true;
+          setIsAdmin(adminCheck);
           setNome(data.nome || '');
+          if (adminCheck) {
+            carregarLembretesRevisao();
+          }
         }
       }
     }
@@ -34,6 +40,44 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
     await supabase.auth.signOut();
     window.location.href = '/login';
   };
+
+  async function carregarLembretesRevisao() {
+    try {
+      const { data: listData, error: listError } = await supabase
+        .from('ofertas_swipe_file')
+        .select('id, nome_produto, nicho, data_ultima_verificacao, created_at, link_biblioteca_anuncios');
+      if (listError) throw listError;
+      
+      if (listData) {
+        const pendentes = listData.filter(oferta => {
+          const ultimaVerificacao = oferta.data_ultima_verificacao || oferta.created_at;
+          if (!ultimaVerificacao) return true;
+          const diffMs = new Date() - new Date(ultimaVerificacao);
+          const diffDays = diffMs / (1000 * 60 * 60 * 24);
+          return diffDays >= 3;
+        });
+        setRevisoesPendentes(pendentes);
+      }
+    } catch (err) {
+      console.error("Erro Supabase:", err);
+    }
+  }
+
+  async function marcarComoVerificadoNavbar(ofertaId) {
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from('ofertas_swipe_file')
+        .update({ data_ultima_verificacao: now })
+        .eq('id', ofertaId);
+      if (error) throw error;
+      
+      setRevisoesPendentes(prev => prev.filter(o => o.id !== ofertaId));
+    } catch (err) {
+      console.error("Erro Supabase:", err);
+      alert("Erro ao marcar como verificado.");
+    }
+  }
 
   const inicial = nome ? nome.charAt(0).toUpperCase() : 'U';
 
@@ -83,6 +127,27 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
             >
               Acervo Drive
             </Link>
+
+            {/* Notification Bell */}
+            {isAdmin && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPainelOpen(true)}
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer relative"
+                  aria-label="Notificações"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {revisoesPendentes.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-xs">
+                      {revisoesPendentes.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Profile Dropdown */}
             <div className="relative">
@@ -179,7 +244,27 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
           </nav>
 
           {/* Hamburger (Mobile) */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center gap-2">
+            {isAdmin && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPainelOpen(true)}
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer relative"
+                  aria-label="Notificações"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {revisoesPendentes.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-xs">
+                      {revisoesPendentes.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+          
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -259,6 +344,103 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                 Sair
               </button>
             </nav>
+          </div>
+        </div>
+      )}
+      {/* Slide-over de Triagem */}
+      {painelOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300"
+              onClick={() => setPainelOpen(false)}
+            ></div>
+
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+              <div className="pointer-events-auto w-screen max-w-md transform transition duration-300 ease-in-out sm:duration-400">
+                <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-2xl">
+                  {/* Header */}
+                  <div className="p-6 border-b border-gray-150 dark:border-gray-800 flex items-center justify-between">
+                    <h2 className="text-lg font-extrabold text-gray-950 dark:text-white flex items-center gap-2">
+                      <span>🚨</span> Revisão Necessária
+                    </h2>
+                    <button 
+                      onClick={() => setPainelOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 bg-gray-100 dark:bg-gray-800 p-2 rounded-full transition cursor-pointer"
+                      aria-label="Fechar painel"
+                    >
+                      ❌
+                    </button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative flex-1 p-6 space-y-4">
+                    {revisoesPendentes.length === 0 ? (
+                      <div className="text-center py-12">
+                        <span className="text-4xl block mb-3">🎉</span>
+                        <p className="text-sm font-bold text-gray-900 dark:text-white">Tudo em dia!</p>
+                        <p className="text-xs text-gray-550 mt-1">Nenhuma oferta pendente de revisão.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider mb-4">
+                          Ofertas não verificadas há mais de 3 dias
+                        </p>
+                        {revisoesPendentes.map((oferta) => {
+                          const ultimaVer = oferta.data_ultima_verificacao || oferta.created_at;
+                          const diffMs = new Date() - new Date(ultimaVer);
+                          const diasAtraso = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                          return (
+                            <div 
+                              key={oferta.id} 
+                              className="bg-gray-50 dark:bg-gray-850 border border-gray-150 dark:border-gray-800 rounded-xl p-4 flex flex-col gap-3 shadow-xs"
+                            >
+                              <div>
+                                <span className="text-sm font-bold text-gray-900 dark:text-white block truncate">
+                                  {oferta.nome_produto}
+                                </span>
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                  <span className="text-[10px] bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded font-bold border border-blue-200/50 dark:border-blue-800/30">
+                                    📁 {oferta.nicho}
+                                  </span>
+                                  <span className="text-[10px] bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 px-2 py-0.5 rounded font-bold border border-red-200/50 dark:border-red-800/50 animate-pulse">
+                                    ⚠️ {diasAtraso} dias sem rever
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex gap-2.5 pt-2 border-t border-gray-150/60 dark:border-gray-800/60">
+                                {oferta.link_biblioteca_anuncios ? (
+                                  <a 
+                                    href={oferta.link_biblioteca_anuncios} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-850 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2 px-3 rounded-lg text-xs border border-gray-200 dark:border-gray-700 text-center transition flex items-center justify-center gap-1 cursor-pointer"
+                                  >
+                                    🔗 Ver Anúncios
+                                  </a>
+                                ) : (
+                                  <span className="flex-1 text-gray-400 text-[10px] italic flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                                    Sem link cadastrado
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => marcarComoVerificadoNavbar(oferta.id)}
+                                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                  ✅ Verificado
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
