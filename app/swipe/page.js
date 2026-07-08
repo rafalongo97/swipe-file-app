@@ -108,6 +108,18 @@ export default function Dashboard() {
         setIsAdmin(true);
       }
 
+      // Verifica is_admin no banco de dados (profiles)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', session.user.id)
+        .single();
+      if (profile && profile.is_admin === true) {
+        setIsAdmin(true);
+      }
+
+      console.log("DEBUG Swipe - User:", session.user.email, "isAdmin via profile:", profile?.is_admin);
+
       // Verifica status de acesso através da API segura
       const res = await fetch('/api/auth/check-status', {
         headers: {
@@ -670,9 +682,9 @@ export default function Dashboard() {
                           {oferta.esta_escalada && (
                             <span className="ml-1.5 text-sm" title="Oferta Escalada">🚀</span>
                           )}
-                          {oferta.oculta_para_membros === true && (
-                            <span className="inline-flex items-center gap-1 bg-zinc-800 text-zinc-350 text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 shadow-sm" title="Visível apenas para admins">
-                              🔒 Privada
+                          {/* DEBUG: force visibility check */ oferta.oculta_para_membros === true && (
+                            <span className="bg-red-900/50 text-red-400 text-xs px-2 py-1 rounded-full flex items-center gap-1 border border-red-700/50" title="Oculta para usuários comuns">
+                              👁️‍🗨️ Privada
                             </span>
                           )}
                         </div>
@@ -734,8 +746,8 @@ export default function Dashboard() {
                 <h3 className="text-xl font-bold text-gray-900 leading-snug flex items-center gap-2">
                   {ofertaSelecionada.nome_produto}
                   {ofertaSelecionada.oculta_para_membros === true && (
-                    <span className="inline-flex items-center gap-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 shadow-sm">
-                      🔒 Privada
+                    <span className="bg-red-900/50 text-red-400 text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 border border-red-700/50" title="Oculta para usuários comuns">
+                      👁️‍🗨️ Privada
                     </span>
                   )}
                 </h3>

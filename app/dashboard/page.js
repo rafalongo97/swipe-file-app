@@ -132,7 +132,7 @@ export default function ClientDashboardPage() {
     carregarHistoricoNomes();
   }, [ofertaSelecionada]);
 
-?  // Summary Metrics calculations
+  // Summary Metrics calculations
   const totalEscaladas = ofertas.filter(item => item.esta_escalada).length;
   
   const totalMais30Dias = ofertas.filter(item => {
@@ -285,7 +285,7 @@ export default function ClientDashboardPage() {
     );
   };
 
-?  // Exact center coordinates for Donut charts
+  // Exact center coordinates for Donut charts
   const cx = '50%';
   const cy = 100;
 
@@ -451,7 +451,7 @@ export default function ClientDashboardPage() {
           </div>
         </div>
 
-?        {/* Top 5 Table */}
+        {/* Top 5 Table */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-gray-800">
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
