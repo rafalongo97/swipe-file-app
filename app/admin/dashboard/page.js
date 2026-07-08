@@ -9,6 +9,7 @@ export default function AdminDashboardPage() {
   const [carregando, setCarregando] = useState(true);
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [erro, setErro] = useState(null);
 
   // Dynamic database states
   const [ofertas, setOfertas] = useState([]);
@@ -57,38 +58,55 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     async function verificarAcesso() {
-      setCarregando(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = '/login';
-        return;
-      }
+      try {
+        setCarregando(true);
+        setErro(null);
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        
+        if (!session) {
+          window.location.href = '/login';
+          return;
+        }
 
-      // Check if user is admin
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', session.user.id)
-        .single();
+        // Check if user is admin
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
 
-      if (error || !profile || profile.is_admin !== true) {
-        alert('Acesso negado. Esta área é exclusiva para administradores.');
-        window.location.href = '/dashboard';
-        return;
-      }
+        if (profileError) throw profileError;
 
-      const res = await fetch('/api/auth/check-status', {
-        headers: { 'Authorization': "Bearer " + session?.access_token }
-      });
-      const statusData = await res.json();
-      if (statusData && statusData.active === false) {
-        alert('Sua conta está inativa. Entre em contato com o suporte.');
-        await supabase.auth.signOut();
-        window.location.href = '/login';
-        return;
+        if (!profile || profile.is_admin !== true) {
+          alert('Acesso negado. Esta área é exclusiva para administradores.');
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/auth/check-status', {
+            headers: { 'Authorization': "Bearer " + session?.access_token }
+          });
+          if (!res.ok) throw new Error("Check-status response failed");
+          const statusData = await res.json();
+          if (statusData && statusData.active === false) {
+            alert('Sua conta está inativa. Entre em contato com o suporte.');
+            await supabase.auth.signOut();
+            window.location.href = '/login';
+            return;
+          }
+        } catch (statusErr) {
+          console.error("Erro secundário check-status:", statusErr);
+        }
+
+        await carregarDadosAdmin();
+      } catch (err) {
+        console.error("Erro Supabase:", err);
+        setErro(err.message || "Erro ao verificar credenciais de acesso.");
+      } finally {
+        setCarregando(false);
       }
-      await carregarDadosAdmin();
-      setCarregando(false);
     }
     verificarAcesso();
   }, []);
@@ -98,7 +116,35 @@ export default function AdminDashboardPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Verificando credenciais de administrador...</p>
+          <p className="text-gray-550 dark:text-gray-400 font-medium">Verificando credenciais de administrador...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-900 border border-red-500/20 rounded-2xl shadow-xl max-w-md w-full p-6 text-center">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+            ⚠️
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Erro ao carregar painel</h2>
+          <p className="text-sm text-gray-550 dark:text-gray-400 mb-6">{erro}</p>
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-purple-600 hover:bg-purple-750 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md cursor-pointer"
+            >
+              🔄 Tentar Novamente
+            </button>
+            <a
+              href="/dashboard"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2 px-6 rounded-lg text-sm border border-gray-200 dark:border-gray-700 transition text-center cursor-pointer"
+            >
+              ⬅️ Voltar
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -116,11 +162,13 @@ export default function AdminDashboardPage() {
       const { count: usersCount, error: usersError } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true });
-      if (!usersError && usersCount !== null) {
+      if (usersError) throw usersError;
+      if (usersCount !== null) {
         setTotalUsers(usersCount);
       }
     } catch (err) {
-      console.error("Erro ao carregar dados admin:", err);
+      console.error("Erro Supabase:", err);
+      throw err;
     }
   };
 
@@ -135,19 +183,20 @@ export default function AdminDashboardPage() {
   };
 
   const handleMarcarComoVerificado = async (ofertaId) => {
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("ofertas_swipe_file")
-      .update({ data_ultima_verificacao: now })
-      .eq("id", ofertaId);
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("ofertas_swipe_file")
+        .update({ data_ultima_verificacao: now })
+        .eq("id", ofertaId);
 
-    if (error) {
-      console.error("Erro ao atualizar verificação:", error);
+      if (error) throw error;
+
+      setOfertas(prev => prev.map(o => o.id === ofertaId ? { ...o, data_ultima_verificacao: now } : o));
+    } catch (error) {
+      console.error("Erro Supabase:", error);
       alert("Erro ao marcar como verificado.");
-      return;
     }
-
-    setOfertas(prev => prev.map(o => o.id === ofertaId ? { ...o, data_ultima_verificacao: now } : o));
   };
 
   const abrirModalEdicaoRapida = (oferta) => {
@@ -158,28 +207,29 @@ export default function AdminDashboardPage() {
 
   const salvarEdicaoRapida = async () => {
     if (!ofertaParaEditar) return;
-    const { error } = await supabase
-      .from("ofertas_swipe_file")
-      .update({
+    try {
+      const { error } = await supabase
+        .from("ofertas_swipe_file")
+        .update({
+          qtd_criativos_ativos: editQtdCriativosAtivos,
+          status_ativo: editStatusAtivo,
+          atualizado_em: new Date().toISOString()
+        })
+        .eq("id", ofertaParaEditar.id);
+
+      if (error) throw error;
+
+      setOfertas(prev => prev.map(o => o.id === ofertaParaEditar.id ? {
+        ...o,
         qtd_criativos_ativos: editQtdCriativosAtivos,
-        status_ativo: editStatusAtivo,
-        atualizado_em: new Date().toISOString()
-      })
-      .eq("id", ofertaParaEditar.id);
+        status_ativo: editStatusAtivo
+      } : o));
 
-    if (error) {
-      console.error("Erro ao salvar edição rápida:", error);
+      setOfertaParaEditar(null);
+    } catch (error) {
+      console.error("Erro Supabase:", error);
       alert("Erro ao salvar alterações.");
-      return;
     }
-
-    setOfertas(prev => prev.map(o => o.id === ofertaParaEditar.id ? {
-      ...o,
-      qtd_criativos_ativos: editQtdCriativosAtivos,
-      status_ativo: editStatusAtivo
-    } : o));
-
-    setOfertaParaEditar(null);
   };
 
   const ofertasPendentes = obterOfertasPendentesRevisao();
