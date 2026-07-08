@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
     setIsDark(isDarkTheme);
   }, []);
 
-  const toggleTheme = () => {
+  function toggleTheme() {
     if (document.documentElement.classList.contains('dark')) {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
       localStorage.setItem('theme', 'dark');
       setIsDark(true);
     }
-  };
+  }
 
   useEffect(() => {
     async function verificarAcesso() {
@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
   }
 
   // Fetch admin stats and data
-  const carregarDadosAdmin = async () => {
+  async function carregarDadosAdmin() {
     try {
       const { data: listData, error: listError } = await supabase
         .from("ofertas_swipe_file")
@@ -170,9 +170,9 @@ export default function AdminDashboardPage() {
       console.error("Erro Supabase:", err);
       throw err;
     }
-  };
+  }
 
-  const obterOfertasPendentesRevisao = () => {
+  function obterOfertasPendentesRevisao() {
     return ofertas.filter(oferta => {
       const ultimaVerificacao = oferta.data_ultima_verificacao || oferta.created_at;
       if (!ultimaVerificacao) return true;
@@ -180,9 +180,9 @@ export default function AdminDashboardPage() {
       const diffDays = diffMs / (1000 * 60 * 60 * 24);
       return diffDays >= 3;
     });
-  };
+  }
 
-  const handleMarcarComoVerificado = async (ofertaId) => {
+  async function handleMarcarComoVerificado(ofertaId) {
     try {
       const now = new Date().toISOString();
       const { error } = await supabase
@@ -197,15 +197,15 @@ export default function AdminDashboardPage() {
       console.error("Erro Supabase:", error);
       alert("Erro ao marcar como verificado.");
     }
-  };
+  }
 
-  const abrirModalEdicaoRapida = (oferta) => {
+  function abrirModalEdicaoRapida(oferta) {
     setOfertaParaEditar(oferta);
     setEditQtdCriativosAtivos(oferta.qtd_criativos_ativos || 0);
     setEditStatusAtivo(oferta.status_ativo !== undefined ? oferta.status_ativo : true);
-  };
+  }
 
-  const salvarEdicaoRapida = async () => {
+  async function salvarEdicaoRapida() {
     if (!ofertaParaEditar) return;
     try {
       const { error } = await supabase
@@ -230,7 +230,7 @@ export default function AdminDashboardPage() {
       console.error("Erro Supabase:", error);
       alert("Erro ao salvar alterações.");
     }
-  };
+  }
 
   const ofertasPendentes = obterOfertasPendentesRevisao();
 
