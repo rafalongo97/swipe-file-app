@@ -503,7 +503,7 @@ export default function Home() {
       {/* Top Navbar */}
       <Navbar activePage="swipe" isDark={isDark} toggleTheme={toggleTheme} />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 md:ml-64 px-6 py-10">
         
         {/* Navigation Breadcrumb */}
         <div className="mb-6 flex justify-between items-center">

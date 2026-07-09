@@ -210,7 +210,7 @@ export default function Configuracoes() {
       {/* Top Navbar */}
       <Navbar activePage="configuracoes" isDark={isDark} toggleTheme={toggleTheme} />
 
-      <main className="flex-1 max-w-lg w-full mx-auto px-4 py-12 flex flex-col justify-center">
+      <main className="flex-1 md:ml-64 px-6 py-12 flex flex-col justify-center">
         
         <div className="bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-300">
           <div className="mb-6">

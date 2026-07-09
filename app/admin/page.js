@@ -192,7 +192,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-955 flex flex-col transition-colors duration-300">
       <Navbar activePage="admin-panel" isDark={isDark} toggleTheme={toggleTheme} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 md:ml-64 px-6 py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-gray-955 dark:text-white tracking-tight">Painel Administrativo 🛡️</h1>
           <p className="text-sm text-gray-550 dark:text-gray-450 mt-1">Gerencie as contas dos usuários do sistema, alterne cargos e defina permissões de acesso.</p>

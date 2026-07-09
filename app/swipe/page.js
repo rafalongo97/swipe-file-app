@@ -421,7 +421,7 @@ export default function Dashboard() {
       {/* Top Navbar */}
       <Navbar activePage="swipe" isDark={isDark} toggleTheme={toggleTheme} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-1 md:ml-64 px-6 py-10">
         
         {/* Header section with title and CTA */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">

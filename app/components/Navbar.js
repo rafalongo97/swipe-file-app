@@ -82,53 +82,57 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
   const inicial = nome ? nome.charAt(0).toUpperCase() : 'U';
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 shadow-sm transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+    <header className="bg-white dark:bg-gray-900 border-b md:border-b-0 border-gray-200 dark:border-gray-800 sticky md:fixed top-0 left-0 z-40 w-full md:w-64 h-16 md:h-screen md:flex md:flex-col md:justify-between md:p-6 shadow-sm md:shadow-none transition-colors duration-300">
+      
+      <div className="w-full md:h-full md:flex md:flex-col md:justify-between">
+        
+        <div className="flex justify-between md:flex-col md:items-start md:space-y-8 px-4 sm:px-6 lg:px-8 md:px-0 h-16 md:h-auto items-center w-full">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <Link href="/dashboard" className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight hover:opacity-90 transition">
               Swipe<span className="text-blue-600">File</span>
             </Link>
-            <span className="bg-blue-50 dark:bg-blue-950/40 text-blue-750 dark:text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/50">
+            <span className="bg-blue-50 dark:bg-blue-955/25 text-blue-750 dark:text-blue-400 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/50">
               PRO
             </span>
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex flex-col items-start space-y-3 w-full">
             <Link 
               href="/dashboard" 
-              className={`text-sm font-semibold transition ${
+              className={`text-sm font-semibold w-full px-3 py-2 rounded-lg transition ${
                 activePage === 'dashboard' 
-                  ? 'text-blue-600 font-bold' 
-                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-bold' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-500'
               }`}
             >
               Dashboard
             </Link>
             <Link 
               href="/swipe" 
-              className={`text-sm font-semibold transition ${
+              className={`text-sm font-semibold w-full px-3 py-2 rounded-lg transition ${
                 activePage === 'swipe' 
-                  ? 'text-blue-600 font-bold' 
-                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-bold' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-500'
               }`}
             >
               Swipe File
             </Link>
             <Link 
               href="/acervo" 
-              className={`text-sm font-semibold transition ${
+              className={`text-sm font-semibold w-full px-3 py-2 rounded-lg transition ${
                 activePage === 'acervo' 
-                  ? 'text-blue-600 font-bold' 
-                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-500'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-bold' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-blue-600 dark:hover:text-blue-500'
               }`}
             >
               Acervo Drive
             </Link>
+          </nav>
 
-            {/* Notification Bell */}
+          {/* Hamburger (Mobile) */}
+          <div className="flex md:hidden items-center gap-2">
             {isAdmin && (
               <div className="relative">
                 <button
@@ -148,6 +152,43 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                 </button>
               </div>
             )}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 rounded-lg text-gray-500 hover:text-gray-755 dark:text-gray-400 focus:outline-none transition border border-gray-200 dark:border-gray-700"
+            >
+              <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Bottom Controls */}
+        <div className="hidden md:flex flex-col gap-4 pt-4 border-t border-gray-200 dark:border-gray-800 w-full mt-auto">
+          <div className="flex items-center justify-between w-full">
+            {/* Notification Bell */}
+            {isAdmin ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPainelOpen(true)}
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer relative"
+                  aria-label="Notificações"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {revisoesPendentes.length > 0 && (
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-xs">
+                      {revisoesPendentes.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div />
+            )}
 
             {/* Profile Dropdown */}
             <div className="relative">
@@ -161,22 +202,19 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
 
               {dropdownOpen && (
                 <>
-                  {/* Invisible Backdrop Click Trigger to Close */}
                   <button 
                     type="button"
                     onClick={() => setDropdownOpen(false)} 
-                    className="fixed inset-0 h-full w-full bg-transparent cursor-default outline-none z-20"
+                    className="fixed inset-0 h-full w-full bg-transparent cursor-default outline-none z-25"
                   ></button>
 
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-30 transform origin-top-right transition duration-250 text-left">
-                    {/* 1. Logged in user info */}
+                  <div className="absolute left-0 bottom-12 w-56 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-30 transform origin-bottom-left transition duration-250 text-left">
                     <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                       <p className="text-xs text-gray-400 font-medium">Logado como</p>
                       <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">{nome || 'Usuário'}</p>
                       <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{email}</p>
                     </div>
 
-                    {/* 2 & 3. Admin Links */}
                     {isAdmin && (
                       <div className="py-1">
                         <Link 
@@ -200,12 +238,9 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                       </div>
                     )}
 
-                    {/* 4. Subtle divider */}
                     {isAdmin && <hr className="border-gray-100 dark:border-gray-700 my-1" />}
 
-                    {/* 5, 6 & 7. General Items */}
                     <div className="py-1">
-                      {/* Theme Switcher Button */}
                       <button
                         type="button"
                         onClick={() => {
@@ -241,43 +276,12 @@ export default function Navbar({ activePage, isDark, toggleTheme }) {
                 </>
               )}
             </div>
-          </nav>
-
-          {/* Hamburger (Mobile) */}
-          <div className="flex md:hidden items-center gap-2">
-            {isAdmin && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setPainelOpen(true)}
-                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition cursor-pointer relative"
-                  aria-label="Notificações"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  {revisoesPendentes.length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-xs">
-                      {revisoesPendentes.length}
-                    </span>
-                  )}
-                </button>
-              </div>
-            )}
-          
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-lg text-gray-500 hover:text-gray-755 dark:text-gray-400 focus:outline-none transition border border-gray-200 dark:border-gray-700"
-            >
-              <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-              </svg>
-            </button>
           </div>
         </div>
-      </div>
 
+      </div>
+      
+      
       {/* Mobile Drawer */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex justify-end">
