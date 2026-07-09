@@ -691,7 +691,7 @@ export default function Dashboard() {
                       {/* Criador */}
                       <td className="p-4 align-middle">
                         <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                          <span>Criado por: <span className="font-semibold text-gray-700 dark:text-gray-300">{oferta.profiles?.nome || 'Desconhecido'}</span></span>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">{oferta.profiles?.nome || 'Desconhecido'}</span>
                           {oferta.profiles?.is_admin === true && (
                             <span className="inline-flex items-center gap-1 bg-purple-900/10 text-purple-700 dark:bg-purple-955/40 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-900/30">
                               🛡️ Admin
