@@ -646,6 +646,9 @@ export default function Dashboard() {
                         Nome da Oferta {renderSortIcon('nome_produto')}
                       </button>
                     </th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Criador</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Criativos</th>
+                    <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Tags/Plataforma</th>
                     <th className="p-4 font-bold text-gray-700 uppercase tracking-wider text-xs text-left">Status do Funil</th>
                     <th className="p-4 text-left">
                       <button 
@@ -666,29 +669,28 @@ export default function Dashboard() {
                       className="hover:bg-blue-50/40 cursor-pointer transition-all duration-200"
                     >
                       {/* Tipo de Oferta */}
-                      <td className="p-4">
+                      <td className="p-4 align-middle">
                         {renderTipoOfertaBadges(oferta)}
                       </td>
                       {/* Idioma/Mercado */}
-                      <td className="p-4">
+                      <td className="p-4 align-middle">
                         <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 px-2.5 py-0.5 text-xs font-semibold border border-gray-200 dark:border-gray-700/50 shadow-sm">
                           {oferta.idioma_mercado || 'BR'}
                         </span>
                       </td>
                       {/* Produto */}
-                      <td className="p-4">
+                      <td className="p-4 align-middle">
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           <span className="text-base">📁</span> {oferta.nome_produto}
                           {oferta.esta_escalada && (
                             <span className="ml-1.5 text-sm" title="Oferta Escalada">🚀</span>
                           )}
-                          {/* DEBUG: force visibility check */ oferta.oculta_para_membros === true && (
-                            <span className="bg-red-900/50 text-red-400 text-xs px-2 py-1 rounded-full flex items-center gap-1 border border-red-700/50" title="Oculta para usuários comuns">
-                              👁️‍🗨️ Privada
-                            </span>
-                          )}
                         </div>
-                        <div className="text-[11px] text-gray-500 mt-1 pl-7 flex items-center gap-1.5">
+                      </td>
+
+                      {/* Criador */}
+                      <td className="p-4 align-middle">
+                        <div className="text-xs text-gray-500 flex items-center gap-1.5">
                           <span>Criado por: <span className="font-semibold text-gray-700 dark:text-gray-300">{oferta.profiles?.nome || 'Desconhecido'}</span></span>
                           {oferta.profiles?.is_admin === true && (
                             <span className="inline-flex items-center gap-1 bg-purple-900/10 text-purple-700 dark:bg-purple-955/40 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-900/30">
@@ -696,29 +698,42 @@ export default function Dashboard() {
                             </span>
                           )}
                         </div>
-                        {(oferta.tags || (oferta.qtd_criativos_ativos !== undefined && oferta.qtd_criativos_ativos !== null)) && (
-                          <div className="flex flex-wrap gap-1.5 mt-1 pl-7 items-center">
-                            {oferta.qtd_criativos_ativos !== undefined && oferta.qtd_criativos_ativos !== null && (
-                              <span className="text-[10px] bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded font-bold border border-blue-200/50 dark:border-blue-900/30">
-                                🖼️ {oferta.qtd_criativos_ativos} Criativos Ativos
-                              </span>
-                            )}
-                            {oferta.tags && oferta.tags.split(',').map((tag, i) => (
-                              <span key={i} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
-                                {tag.trim()}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                      </td>
+
+                      {/* Criativos */}
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center">
+                          {oferta.qtd_criativos_ativos !== undefined && oferta.qtd_criativos_ativos !== null && (
+                            <span className="text-[10px] bg-blue-50 dark:bg-blue-955/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded font-bold border border-blue-200/50 dark:border-blue-900/30">
+                              🖼️ {oferta.qtd_criativos_ativos} Criativos Ativos
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Tags/Plataforma */}
+                      <td className="p-4 align-middle">
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          {oferta.oculta_para_membros === true && (
+                            <span className="bg-red-900/50 text-red-400 text-xs px-2 py-1 rounded-full flex items-center gap-1 border border-red-700/50" title="Oculta para usuários comuns">
+                              👁️‍🗨️ Privada
+                            </span>
+                          )}
+                          {oferta.tags && oferta.tags.split(',').map((tag, i) => (
+                            <span key={i} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded font-medium border border-gray-200/50 dark:border-gray-700/50">
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
                       </td>
 
                       {/* Status do Funil */}
-                      <td className="p-4">
+                      <td className="p-4 align-middle">
                         {renderStatusFunilBadge(oferta.status_funil)}
                       </td>
 
                       {/* Tempo Ativo */}
-                      <td className="p-4 text-gray-600 dark:text-gray-400 font-semibold">
+                      <td className="p-4 align-middle text-gray-600 dark:text-gray-400 font-semibold">
                         {oferta.status_ativo === false ? (
                           <span className="text-red-500 dark:text-red-400 font-bold">Oferta inativa</span>
                         ) : (
