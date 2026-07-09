@@ -52,7 +52,7 @@ export default function ClientDashboardPage() {
       });
       const statusData = await res.json();
       if (statusData && statusData.active === false) {
-        alert('Sua conta est� inativa. Entre em contato com o suporte.');
+        alert('Sua conta está inativa. Entre em contato com o suporte.');
         await supabase.auth.signOut();
         window.location.href = '/login';
       }
@@ -149,7 +149,7 @@ export default function ClientDashboardPage() {
 
   // Format Distribution calculations (Reduce)
   const formatDataMap = ofertas.reduce((acc, item) => {
-    const key = item.formato_entrega || 'N�o informado';
+    const key = item.formato_entrega || 'Não informado';
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
@@ -160,7 +160,7 @@ export default function ClientDashboardPage() {
 
   // Niche Distribution calculations (Reduce)
   const nicheDataMap = ofertas.reduce((acc, item) => {
-    const key = item.nicho || 'N�o informado';
+    const key = item.nicho || 'Não informado';
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
@@ -197,8 +197,8 @@ export default function ClientDashboardPage() {
     const diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
     if (diferencaDias < 0) return 'Data futura';
     if (diferencaDias === 0) return 'Ativo hoje';
-    if (diferencaDias === 1) return 'Ativo h� 1 dia';
-    return `Ativo h� ${diferencaDias} dias`;
+    if (diferencaDias === 1) return 'Ativo há 1 dia';
+    return `Ativo há ${diferencaDias} dias`;
   };
 
   const formatarPreco = (valor) => {
@@ -207,13 +207,13 @@ export default function ClientDashboardPage() {
   };
 
   const renderStatusFunilBadge = (status) => {
-    const val = status || 'Em an�lise';
+    const val = status || 'Em análise';
     let classes = 'bg-gray-250 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
-    if (val === 'Em an�lise') {
+    if (val === 'Em análise') {
       classes = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300';
     } else if (val === 'Para modelar') {
       classes = 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
-    } else if (val === 'J� testei') {
+    } else if (val === 'Já testei') {
       classes = 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300';
     } else if (val === 'Descartado') {
       classes = 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
@@ -301,7 +301,7 @@ export default function ClientDashboardPage() {
             Dashboard
           </h1>
           <p className="text-sm text-gray-550 dark:text-gray-400 mt-1">
-            An�lise geral do seu portf�lio de ofertas e criativos ativos.
+            Análise geral do seu portfólio de ofertas e criativos ativos.
           </p>
         </div>
 
@@ -326,11 +326,11 @@ export default function ClientDashboardPage() {
             </div>
           </div>
 
-          {/* Card 2: Ofertas Rodando h� +30 Dias */}
+          {/* Card 2: Ofertas Rodando há +30 Dias */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs p-6 flex items-center justify-between transition hover:shadow-md">
             <div>
               <span className="text-xs font-bold text-gray-400 dark:text-gray-555 uppercase tracking-wider block">
-                Ofertas Rodando h� +30 Dias
+                Ofertas Rodando há +30 Dias
               </span>
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-500 mt-1 block">
                 {totalMais30Dias}
@@ -348,11 +348,11 @@ export default function ClientDashboardPage() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Chart 1: Distribui��o por Formato */}
+          {/* Chart 1: Distribuição por Formato */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col relative">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500 block"></span>
-              Distribui��o por Formato
+              Distribuição por Formato
             </h2>
             <div className="h-64 flex items-center justify-center relative">
               {mounted ? (
@@ -394,16 +394,16 @@ export default function ClientDashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-gray-400 animate-pulse text-sm">Carregando gr�fico...</div>
+                <div className="text-gray-400 animate-pulse text-sm">Carregando gráfico...</div>
               )}
             </div>
           </div>
 
-          {/* Chart 2: Distribui��o por Nicho */}
+          {/* Chart 2: Distribuição por Nicho */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl p-6 shadow-xs flex flex-col relative">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-violet-500 block"></span>
-              Distribui��o por Nicho
+              Distribuição por Nicho
             </h2>
             <div className="h-64 flex items-center justify-center relative">
               {mounted ? (
@@ -445,7 +445,7 @@ export default function ClientDashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-gray-400 animate-pulse text-sm">Carregando gr�fico...</div>
+                <div className="text-gray-400 animate-pulse text-sm">Carregando gráfico...</div>
               )}
             </div>
           </div>
@@ -455,7 +455,7 @@ export default function ClientDashboardPage() {
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-gray-800">
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              ?? Top 5 Ofertas Mais Escaladas
+              🏆 Top 5 Ofertas Mais Escaladas
             </h2>
             <p className="text-xs text-gray-555 dark:text-gray-400 mt-1">
               Clique em qualquer linha da tabela para visualizar todos os detalhes da oferta.
@@ -512,7 +512,7 @@ export default function ClientDashboardPage() {
                       <td className="p-4 text-center font-semibold text-gray-700 dark:text-gray-300">
                         {item.data_primeiro_anuncio ? (
                           <>
-                            {obterTempoAtivo(item.data_primeiro_anuncio).replace('Ativo h� ', '')}
+                            {obterTempoAtivo(item.data_primeiro_anuncio).replace('Ativo há ', '')}
                           </>
                         ) : (
                           'Sem registro'
@@ -587,7 +587,7 @@ export default function ClientDashboardPage() {
                 <div className="bg-gray-50 dark:bg-gray-800/30 p-3.5 rounded-lg border border-gray-150 dark:border-gray-800">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Nicho / Subnicho</span>
                   <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                    {ofertaSelecionada.nicho || 'N�o informado'} 
+                    {ofertaSelecionada.nicho || 'Não informado'} 
                     {ofertaSelecionada.subnicho && ` > ${ofertaSelecionada.subnicho}`}
                   </span>
                 </div>
@@ -650,10 +650,10 @@ export default function ClientDashboardPage() {
 
               {/* Pricing Cards */}
               <div>
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informa��es de Precifica��o</h4>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Informações de Precificação</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-100/50 dark:border-blue-900/30">
-                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Pre�o Front</span>
+                    <span className="text-[10px] font-semibold text-blue-500 uppercase tracking-wider block">Preço Front</span>
                     <span className="text-sm font-bold text-blue-700 dark:text-blue-400 mt-1 block">
                       {formatarPreco(ofertaSelecionada.valor_front)}
                     </span>
@@ -679,9 +679,9 @@ export default function ClientDashboardPage() {
                 )}
               </div>
 
-              {/* Hist�rico de Edi��o */}
+              {/* Histórico de Edição */}
               <div className="bg-gray-55 dark:bg-gray-800/30 p-4 rounded-lg border border-gray-150 dark:border-gray-800">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Hist�rico de Edi��o</span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Histórico de Edição</span>
                 <p className="text-xs text-gray-555 dark:text-gray-400">
                   Criado por: <span className="font-semibold">{historicoNomes.criadoPor}</span>
                   {ofertaSelecionada.profiles?.is_admin === true && (
@@ -693,7 +693,7 @@ export default function ClientDashboardPage() {
                 {historicoNomes.atualizadoEm && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
                     <span>??</span>
-                    �ltima atualiza��o por{' '}
+                    Última atualização por{' '}
                     <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.editadoPor}</span>
                     {' '}em{' '}
                     <span className="font-semibold text-gray-600 dark:text-gray-300">{historicoNomes.atualizadoEm}</span>
@@ -733,7 +733,7 @@ export default function ClientDashboardPage() {
                     rel="noopener noreferrer"
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold py-2.5 px-4 rounded-lg text-sm transition"
                   >
-                    ?? Biblioteca de An�ncios
+                    ?? Biblioteca de Anúncios
                   </a>
                 )}
               </div>
